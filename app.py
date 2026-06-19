@@ -7,7 +7,18 @@ import requests
 import streamlit as st
 import streamlit.components.v1 as components
 
-from cancer_tool import __version__, mutations as mut, structures, uniprot, viewer
+from cancer_tool import (
+    __version__,
+    dynamics,
+    mutations as mut,
+    pathogenicity,
+    pockets,
+    scoring,
+    structures,
+    targets,
+    uniprot,
+    viewer,
+)
 
 EXAMPLE_GENES = ["TP53", "KRAS", "BRAF", "KIT", "FLT3", "IDH2", "PTEN", "EGFR"]
 
@@ -132,13 +143,39 @@ def load_hotspots(gene: str):
     return mut.fetch_hotspots(gene, session=http_session())
 
 
+@st.cache_data(show_spinner=False)
+def load_pathogenicity(accession: str):
+    return pathogenicity.fetch_alphamissense(accession, session=http_session())
+
+
+@st.cache_data(show_spinner=False)
+def load_dynamics(pdb_text: str):
+    try:
+        return dynamics.compute_dynamics(pdb_text)
+    except dynamics.DynamicsError:
+        return None
+
+
+@st.cache_data(show_spinner=False)
+def load_pockets(pdb_text: str):
+    try:
+        return pockets.detect_pockets(pdb_text)
+    except Exception:
+        return []
+
+
+@st.cache_data(show_spinner=False)
+def load_targets(gene: str):
+    return targets.fetch_target_context(gene, session=http_session())
+
+
 st.set_page_config(page_title="Cancer Protein Explorer", layout="wide")
 inject_brand_css()
 
 st.title("🧬 Cancer Protein Explorer")
 st.caption(
-    "Visualize cancer-relevant proteins and the mutations that affect them, "
-    "using real AlphaFold structures and curated cancer-genomics data."
+    "AlphaFold structures + protein dynamics + AlphaMissense pathogenicity, fused into "
+    "a ranked shortlist of druggable cancer-driver residues."
 )
 st.warning(
     "**Research and education use only.** This is not a medical device and must "
@@ -161,10 +198,25 @@ with st.sidebar:
         value="R175H",
         help="One-letter form like R175H. Separate multiple with commas or spaces.",
     )
-    color_by_confidence = st.toggle(
-        "Colour by AlphaFold confidence (pLDDT)",
-        value=True,
-        help="Red ≈ low-confidence model, blue ≈ high. Off = rainbow by position.",
+    st.header("Display")
+    color_mode = st.radio(
+        "Colour the structure by",
+        options=["plddt", "flexibility", "priority"],
+        format_func={
+            "plddt": "AlphaFold confidence (pLDDT)",
+            "flexibility": "Dynamics — flexibility (NMA)",
+            "priority": "Target Priority Score",
+        }.get,
+        help=(
+            "pLDDT: model confidence (🔴 low → 🔵 high). "
+            "Flexibility: ENM/NMA intrinsic motion (🔵 rigid core → 🔴 mobile loops). "
+            "Priority: composite druggable-driver score painted on scored residues."
+        ),
+    )
+    show_pocket = st.toggle(
+        "Show top druggable pocket",
+        value=False,
+        help="Overlay a translucent gold surface on the most druggable detected pocket.",
     )
 
 if not gene:
@@ -202,6 +254,25 @@ for mutation in parsed:
     else:
         invalid.append(f"{mutation['label']}: {message}")
 
+# --- Run the analysis engine (each piece cached, each fails soft) -------------
+with st.spinner("Analysing structure, dynamics and variant effects…"):
+    try:
+        hotspots = load_hotspots(gene)
+    except requests.RequestException:
+        hotspots = []
+    pathos = load_pathogenicity(protein["accession"])
+    dyn = load_dynamics(pdb_text)
+    pocket_list = load_pockets(pdb_text)
+    priority_rows = scoring.score_residues(
+        hotspots, pathos, dyn, pocket_list, protein["sequence"]
+    )
+
+# Per-residue colour maps for the viewer.
+flex_map = dynamics.flexibility_by_position(dyn) if dyn else {}
+max_score = max((r["score"] for r in priority_rows), default=0.0) or 1.0
+priority_map = {r["position"]: r["score"] / max_score for r in priority_rows}
+pocket_residues = pocket_list[0]["residues"] if (show_pocket and pocket_list) else None
+
 viewer_col, info_col = st.columns([3, 2], gap="large")
 
 with viewer_col:
@@ -209,11 +280,18 @@ with viewer_col:
     html = viewer.render_structure(
         pdb_text,
         highlights=highlights,
-        color_by_confidence=color_by_confidence,
+        color_mode=color_mode,
+        flexibility=flex_map,
+        priority=priority_map,
+        pocket_residues=pocket_residues,
     )
     components.html(html, height=620, scrolling=False)
-    if color_by_confidence:
-        st.caption("Cartoon coloured by pLDDT: 🔴 low confidence → 🔵 high confidence.")
+    _legend = {
+        "plddt": "Coloured by pLDDT: 🔴 low confidence → 🔵 high confidence.",
+        "flexibility": "Coloured by ENM/NMA flexibility: 🔵 rigid core → 🔴 mobile.",
+        "priority": "Coloured by Target Priority Score: dark → 🟡 gold → 🔴 highest.",
+    }
+    st.caption(_legend[color_mode])
 
 with info_col:
     st.subheader("Protein")
@@ -234,20 +312,94 @@ with info_col:
     if highlights:
         st.success("Highlighted: " + ", ".join(h["label"] for h in highlights))
 
-    st.subheader("Known cancer hotspots")
-    with st.spinner("Loading hotspots…"):
-        try:
-            hotspots = load_hotspots(gene)
-        except requests.RequestException:
-            hotspots = []
-    if hotspots:
-        df = pd.DataFrame(hotspots)[["residue", "count"]]
-        df.columns = ["Residue", "Tumours"]
-        st.dataframe(df, hide_index=True, use_container_width=True, height=260)
+    # Dynamics summary
+    st.subheader("Folding dynamics")
+    if dyn:
+        rank = sorted(
+            zip(dyn["residue_numbers"], dyn["flexibility"]), key=lambda x: x[1]
+        )
+        rigid = ", ".join(str(r) for r, _ in rank[:5])
+        mobile = ", ".join(str(r) for r, _ in rank[-5:][::-1])
+        hinge_txt = ", ".join(str(h) for h in dyn["hinges"][:8]) or "none detected"
+        st.markdown(
+            f"- **Most rigid (core):** {rigid}\n"
+            f"- **Most mobile:** {mobile}\n"
+            f"- **Hinge / domain pivots:** {hinge_txt}"
+        )
         st.caption(
-            "Recurrent mutation sites from "
-            "[cancerhotspots.org](https://www.cancerhotspots.org). "
-            "Copy a residue (e.g. R175) into the sidebar to highlight it."
+            f"Elastic Network Model normal-mode analysis ({dyn['n_modes']} modes) — "
+            "intrinsic motion inferred from one AlphaFold structure, no simulation."
         )
     else:
-        st.caption("No hotspot record found for this gene.")
+        st.caption("Dynamics analysis unavailable for this structure.")
+
+    # Druggability + Open Targets
+    st.subheader("Druggability")
+    if pocket_list:
+        top = pocket_list[0]
+        st.markdown(
+            f"- **Pockets detected:** {len(pocket_list)} "
+            f"({top['source']})\n"
+            f"- **Top pocket:** {top['volume']} Å³, druggability "
+            f"{top['druggability']:.2f}, {len(top['residues'])} lining residues"
+        )
+    else:
+        st.caption("No enclosed pocket detected.")
+
+    context = load_targets(gene)
+    if context:
+        modalities = sorted({t["modality"] for t in context["tractability"]})
+        if modalities:
+            st.markdown("**Tractable modalities:** " + ", ".join(modalities))
+        if context["top_diseases"]:
+            diseases = " · ".join(
+                f"{d['name']} ({d['score']:.2f})" for d in context["top_diseases"][:3]
+            )
+            st.markdown(f"**Top disease links:** {diseases}")
+        st.caption("Target context from [Open Targets](https://platform.opentargets.org).")
+
+# --- Target Priority panel (the discovery deliverable) -----------------------
+st.divider()
+st.subheader("🎯 Target Priority — ranked druggable cancer-driver residues")
+if priority_rows:
+    df = pd.DataFrame(priority_rows)[
+        ["residue", "score", "recurrence", "pathogenicity", "druggability",
+         "criticality", "tumours", "rationale"]
+    ]
+    df.columns = [
+        "Residue", "Priority", "Recurrence", "Pathogenicity", "Druggability",
+        "Criticality", "Tumours", "Why it ranks here",
+    ]
+    st.dataframe(
+        df,
+        hide_index=True,
+        use_container_width=True,
+        height=420,
+        column_config={
+            "Priority": st.column_config.ProgressColumn(
+                "Priority", min_value=0, max_value=100, format="%.0f"
+            ),
+            "Recurrence": st.column_config.ProgressColumn(
+                "Recurrence", min_value=0, max_value=1, format="%.2f"
+            ),
+            "Pathogenicity": st.column_config.ProgressColumn(
+                "Pathogenicity", min_value=0, max_value=1, format="%.2f"
+            ),
+            "Druggability": st.column_config.ProgressColumn(
+                "Druggability", min_value=0, max_value=1, format="%.2f"
+            ),
+            "Criticality": st.column_config.ProgressColumn(
+                "Criticality", min_value=0, max_value=1, format="%.2f"
+            ),
+        },
+    )
+    st.caption(
+        "Priority = 0.30·recurrence + 0.35·pathogenicity + 0.20·druggability + "
+        "0.15·structural criticality. Recurrence: "
+        "[cancerhotspots.org](https://www.cancerhotspots.org). Pathogenicity: "
+        "DeepMind [AlphaMissense](https://alphafold.ebi.ac.uk). Druggability: "
+        "geometric pocket detection. Criticality: ENM/NMA. "
+        "Copy a residue (e.g. R175) into the sidebar to highlight it in 3D."
+    )
+else:
+    st.caption("No recurrent cancer-mutation sites on record for this gene to rank.")

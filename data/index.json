@@ -1,0 +1,45 @@
+{
+  "genes": [
+    {
+      "gene": "TP53",
+      "name": "Cellular tumor antigen p53",
+      "top": "R273"
+    },
+    {
+      "gene": "KRAS",
+      "name": "GTPase KRas",
+      "top": "G12"
+    },
+    {
+      "gene": "BRAF",
+      "name": "Serine/threonine-protein kinase B-raf",
+      "top": "V600"
+    },
+    {
+      "gene": "KIT",
+      "name": "Mast/stem cell growth factor receptor Kit",
+      "top": "D816"
+    },
+    {
+      "gene": "FLT3",
+      "name": "Receptor-type tyrosine-protein kinase FLT3",
+      "top": "578-613"
+    },
+    {
+      "gene": "IDH2",
+      "name": "Isocitrate dehydrogenase [NADP], mitochondrial",
+      "top": "R172"
+    },
+    {
+      "gene": "PTEN",
+      "name": "Phosphatidylinositol 3,4,5-trisphosphate 3-phosphatase and dual-specificity protein phosphatase PTEN",
+      "top": "R130"
+    },
+    {
+      "gene": "EGFR",
+      "name": "Epidermal growth factor receptor",
+      "top": "745-759"
+    }
+  ],
+  "generated": "2026-06-19"
+}

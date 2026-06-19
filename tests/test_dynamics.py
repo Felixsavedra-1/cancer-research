@@ -1,0 +1,66 @@
+"""ENM/NMA dynamics tests on a synthetic α-helix (no network). A free helix
+fluctuates most at its termini and least in the middle — the analysis must reproduce that.
+"""
+
+import math
+
+import numpy as np
+
+from cancer_tool import dynamics
+
+
+def _alpha_helix_pdb(n: int = 16) -> str:
+    """Generate PDB text for an idealised α-helix of ``n`` Cα atoms."""
+    radius, rise, turn = 2.3, 1.5, math.radians(100.0)
+    lines = []
+    for i in range(n):
+        x = radius * math.cos(i * turn)
+        y = radius * math.sin(i * turn)
+        z = i * rise
+        lines.append(
+            f"ATOM  {i + 1:>5}  CA  ALA A{i + 1:>4}    "
+            f"{x:8.3f}{y:8.3f}{z:8.3f}  1.00 50.00           C"
+        )
+    lines.append("END")
+    return "\n".join(lines)
+
+
+def test_returns_per_residue_arrays():
+    result = dynamics.compute_dynamics(_alpha_helix_pdb(16))
+    assert len(result["flexibility"]) == 16
+    assert len(result["rigidity"]) == 16
+    assert len(result["collective_motion"]) == 16
+    assert result["n_modes"] >= 1
+
+
+def test_flexibility_is_normalised():
+    flex = dynamics.compute_dynamics(_alpha_helix_pdb(16))["flexibility"]
+    assert min(flex) >= 0.0
+    assert max(flex) <= 1.0
+    assert math.isclose(max(flex), 1.0, abs_tol=1e-6)  # min-max scaled
+
+
+def test_termini_more_flexible_than_core():
+    flex = dynamics.compute_dynamics(_alpha_helix_pdb(20))["flexibility"]
+    core_mean = float(np.mean(flex[8:12]))
+    termini_mean = float(np.mean([flex[0], flex[1], flex[-2], flex[-1]]))
+    assert termini_mean > core_mean  # classic ENM result
+
+
+def test_rigidity_is_complement_of_flexibility():
+    result = dynamics.compute_dynamics(_alpha_helix_pdb(16))
+    for flex, rigid in zip(result["flexibility"], result["rigidity"]):
+        assert math.isclose(flex + rigid, 1.0, abs_tol=1e-3)
+
+
+def test_is_deterministic():
+    pdb = _alpha_helix_pdb(16)
+    assert dynamics.compute_dynamics(pdb)["flexibility"] == dynamics.compute_dynamics(pdb)["flexibility"]
+
+
+def test_lookup_helpers_align_positions():
+    result = dynamics.compute_dynamics(_alpha_helix_pdb(12))
+    flex_map = dynamics.flexibility_by_position(result)
+    assert set(flex_map) == set(result["residue_numbers"])
+    rigid_map = dynamics.rigidity_by_position(result)
+    assert math.isclose(flex_map[6] + rigid_map[6], 1.0, abs_tol=1e-3)

@@ -1,34 +1,94 @@
-"""Build interactive 3D molecular views with py3Dmol."""
+"""Interactive 3D molecular views with py3Dmol, coloured by pLDDT confidence,
+ENM/NMA flexibility, or the Target Priority Score.
+"""
 
 from __future__ import annotations
 
-import py3Dmol
-
 _HIGHLIGHT_COLORS = ["magenta", "orange", "lime", "cyan", "yellow", "red"]
+
+# Gradient colour stops (RGB), interpolated across a 0–1 value.
+_FLEX_STOPS = [(60, 90, 230), (230, 230, 230), (220, 60, 60)]  # rigid → mobile
+_PRIORITY_STOPS = [  # low → high, ending on the Vedra gold/crimson
+    (40, 40, 46),
+    (110, 92, 52),
+    (198, 161, 91),
+    (178, 58, 58),
+]
+
+
+def _lerp_color(value: float, stops: list[tuple[int, int, int]]) -> str:
+    """Interpolate a 0–1 ``value`` across ``stops`` and return a ``0x`` hex colour."""
+    value = max(0.0, min(1.0, value))
+    if len(stops) == 1:
+        r, g, b = stops[0]
+        return f"0x{r:02x}{g:02x}{b:02x}"
+    span = value * (len(stops) - 1)
+    i = min(int(span), len(stops) - 2)
+    t = span - i
+    r = round(stops[i][0] + (stops[i + 1][0] - stops[i][0]) * t)
+    g = round(stops[i][1] + (stops[i + 1][1] - stops[i][1]) * t)
+    b = round(stops[i][2] + (stops[i + 1][2] - stops[i][2]) * t)
+    return f"0x{r:02x}{g:02x}{b:02x}"
+
+
+def _color_by_values(view, values: dict[int, float], stops, bins: int = 12) -> None:
+    """Colour the cartoon per residue by binning ``{resi: value}`` for few draw calls."""
+    buckets: dict[int, list[int]] = {}
+    for resi, value in values.items():
+        idx = min(bins - 1, max(0, int(value * bins)))
+        buckets.setdefault(idx, []).append(resi)
+    for idx, residues in buckets.items():
+        color = _lerp_color((idx + 0.5) / bins, stops)
+        view.addStyle(
+            {"resi": [str(r) for r in residues]}, {"cartoon": {"color": color}}
+        )
 
 
 def render_structure(
     pdb_text: str,
     highlights: list[dict] | None = None,
-    color_by_confidence: bool = True,
+    color_mode: str = "plddt",
+    flexibility: dict[int, float] | None = None,
+    priority: dict[int, float] | None = None,
+    pocket_residues: list[int] | None = None,
     width: int = 900,
     height: int = 600,
 ) -> str:
     """Return embeddable HTML for a 3D view of ``pdb_text``.
 
-    Each ``highlights`` entry (``{position, label, color?}``) is drawn as sticks plus
-    a translucent sphere and labelled. With ``color_by_confidence`` the cartoon is
-    coloured by pLDDT (the B-factor column of AlphaFold models): red low, blue high.
+    ``color_mode`` selects the cartoon colouring:
+
+    - ``"plddt"`` colours by the B-factor column (AlphaFold pLDDT): red low → blue high.
+    - ``"flexibility"`` colours by ``{resi: 0-1}`` ENM mobility (blue rigid → red mobile).
+    - ``"priority"`` colours by ``{resi: 0-1}`` normalised Target Priority Score.
+
+    ``highlights`` (``{position, label, color?}``) are drawn as labelled sticks +
+    spheres. ``pocket_residues`` adds a translucent gold surface over a druggable pocket.
     """
+    import py3Dmol
+
     view = py3Dmol.view(width=width, height=height)
     view.addModel(pdb_text, "pdb")
 
-    if color_by_confidence:
+    if color_mode == "flexibility" and flexibility:
+        view.setStyle({"cartoon": {"color": "0x404046"}})
+        _color_by_values(view, flexibility, _FLEX_STOPS)
+    elif color_mode == "priority" and priority:
+        view.setStyle({"cartoon": {"color": "0x2a2a2e"}})
+        _color_by_values(view, priority, _PRIORITY_STOPS)
+    elif color_mode == "plddt":
         view.setStyle(
             {"cartoon": {"colorscheme": {"prop": "b", "gradient": "roygb", "min": 50, "max": 90}}}
         )
     else:
         view.setStyle({"cartoon": {"color": "spectrum"}})
+
+    if pocket_residues:
+        view.addSurface(
+            "VDW",
+            {"opacity": 0.55, "color": "0xC6A15B"},
+            {"resi": [str(r) for r in pocket_residues]},
+        )
 
     for index, hit in enumerate(highlights or []):
         position = str(hit["position"])

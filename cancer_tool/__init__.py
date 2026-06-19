@@ -1,6 +1,20 @@
-"""Cancer Protein Explorer — visualize cancer-relevant proteins and their mutations in 3D.
+"""Cancer Protein Explorer — AlphaFold structures, protein dynamics, AlphaMissense
+pathogenicity and pocket detection fused into a ranked shortlist of druggable
+cancer-driver residues.
 
 Research and education use only; not a clinical or diagnostic device.
 """
 
-__version__ = "0.1.0"
+from . import (  # noqa: F401
+    dynamics,
+    mutations,
+    pathogenicity,
+    pockets,
+    scoring,
+    structures,
+    targets,
+    uniprot,
+    viewer,
+)
+
+__version__ = "0.2.0"

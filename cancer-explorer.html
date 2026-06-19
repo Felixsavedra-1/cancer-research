@@ -52,10 +52,12 @@
     display: flex; align-items: center; justify-content: space-between;
     height: 58px; padding: 0 24px;
   }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .divider { color: var(--grey-dim); }
   .mark { font-family: var(--mono); font-size: .86rem; letter-spacing: .14em; }
   .backlink {
-    font-family: var(--mono); font-size: .74rem; letter-spacing: .12em;
-    text-transform: uppercase; color: var(--grey); transition: color .2s ease;
+    font-family: var(--mono); font-size: .8rem; letter-spacing: .12em;
+    color: var(--grey); transition: color .2s ease;
   }
   .backlink:hover { color: var(--bone); }
   .masthead { padding: 26px 24px 20px; }
@@ -144,6 +146,16 @@
   tr.hot { cursor: pointer; }
   tr.hot:hover { background: var(--black-2); }
   .bar { height: 6px; border-radius: 2px; background: var(--gold); }
+  .scorecell { display: flex; align-items: center; gap: 8px; min-width: 120px; }
+  .scorecell .track { flex: 1; background: var(--black-2); border-radius: 2px; height: 8px; overflow: hidden; }
+  .scorecell .fill { height: 100%; border-radius: 2px; }
+  .scorecell .num { font-family: var(--mono); font-size: .78rem; color: var(--bone); width: 28px; text-align: right; }
+  .axes { display: flex; gap: 4px; }
+  .axes .pip { width: 22px; height: 6px; border-radius: 1px; background: var(--black-2); position: relative; overflow: hidden; }
+  .axes .pip i { position: absolute; inset: 0; background: var(--gold-dim); transform-origin: left; }
+  .why { color: var(--grey); font-size: .82rem; }
+  .dyn-line { font-size: .82rem; color: var(--grey); margin-top: 10px; }
+  .dyn-line b { color: var(--bone); font-weight: 500; }
   .status { font-size: .9rem; padding: 10px 14px; border-radius: 2px; }
   .status.info { background: rgba(140,140,147,.08); border: 1px solid var(--line); color: var(--grey); }
   .status.err  { background: rgba(178,58,58,.09); border: 1px solid var(--crimson); color: #d98d8d; }
@@ -190,8 +202,17 @@
   .hot-tick { position: absolute; bottom: 1px; width: 3px; transform: translateX(-50%); background: var(--gold);
     border-radius: 1px 1px 0 0; cursor: pointer; transition: background .15s ease; }
   .hot-tick:hover { background: var(--bone); }
+  .hot-tick.on { background: var(--bone); box-shadow: 0 0 6px rgba(232,227,214,.55); }
   .mut-mark { position: absolute; top: 1px; width: 0; height: 0; transform: translateX(-50%);
-    border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 7px solid; }
+    border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 7px solid;
+    cursor: pointer; transition: filter .15s ease; }
+  .mut-mark::before { content: ""; position: absolute; left: -8px; right: -8px; top: -4px; bottom: -9px; }
+  .mut-mark:hover { filter: brightness(1.35); }
+  .track-clear { font-family: var(--mono); font-size: .64rem; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--grey); background: transparent; border: 1px solid var(--line); border-radius: 2px;
+    padding: 2px 7px; cursor: pointer; transition: color .2s ease, border-color .2s ease; }
+  .track-clear[hidden] { display: none; }
+  .track-clear:hover { color: var(--bone); border-color: var(--gold-dim); }
   .track-empty { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--grey-dim); font-size: .8rem; }
 
   /* Floating tooltip */
@@ -228,8 +249,11 @@
 <body>
 <div class="topbar">
   <div class="topbar-inner">
-    <div class="mark">Vedra Research</div>
-    <a class="backlink" href="https://vedraresearch.github.io/Vedra-Research/">← Index</a>
+    <div class="brand">
+      <span class="mark">Vedra Research</span>
+      <span class="divider">|</span>
+      <a class="backlink" href="https://vedraresearch.github.io/Vedra-Research/">Portfolio</a>
+    </div>
   </div>
 </div>
 
@@ -237,7 +261,7 @@
   <div class="masthead">
     <span class="designation">VR-05</span>
     <h1>Cancer Protein Explorer — proteins and the mutations that <em>drive cancer</em>.</h1>
-    <p class="lede">Fetch a protein's real predicted 3D structure and see exactly where cancer mutations land on it — interactive, in your browser.</p>
+    <p class="lede">Fetch a protein's real AlphaFold structure, analyse its folding dynamics, and rank the most actionable cancer-driver residues — interactive, in your browser.</p>
     <div class="disclaimer"><b>Research and education use only.</b> Not a medical device; not for diagnosis or treatment decisions.</div>
   </div>
 </header>
@@ -265,10 +289,13 @@
 
     <div>
       <h2>Display</h2>
-      <div class="toggle">
-        <input type="checkbox" id="plddt" checked />
-        <label for="plddt" style="margin:0">Colour by AlphaFold confidence (pLDDT)</label>
-      </div>
+      <label for="colormode">Colour the structure by</label>
+      <select id="colormode">
+        <option value="plddt">AlphaFold confidence (pLDDT)</option>
+        <option value="flex">Dynamics — flexibility (NMA)</option>
+        <option value="priority">Target Priority Score</option>
+      </select>
+      <div class="muted" id="engineNote" style="margin-top:8px">Dynamics &amp; priority colouring are precomputed for the featured genes.</div>
     </div>
 
     <button class="primary" id="load">Load structure</button>
@@ -308,7 +335,8 @@
         <div class="track-wrap">
           <div class="track-head">
             <span class="t-title">Position map · N &rarr; C</span>
-            <span class="t-sub">gold = <span class="term" title="A spot in the protein mutated again and again across many patients' tumours.">hotspots</span> (taller = more tumours) · click to highlight</span>
+            <span class="t-sub">gold = <span class="term" title="A spot in the protein mutated again and again across many patients' tumours.">hotspots</span> (taller = more tumours) · click to add or remove
+              <button class="track-clear" id="trackClear" hidden>Clear all</button></span>
           </div>
           <div class="postrack" id="postrack"><div class="track-empty">Load a protein to map its mutation sites along the chain.</div></div>
         </div>
@@ -341,6 +369,11 @@
       </div>
     </div>
 
+    <div class="card" id="priorityCard">
+      <h3>🎯 Target Priority <span class="muted" style="font-weight:400">— ranked druggable cancer-driver residues</span></h3>
+      <div id="priority"><div class="muted">A ranked shortlist of the most actionable residues — recurrence × pathogenicity × druggability × structural criticality — appears here for the featured genes.</div></div>
+    </div>
+
     <div class="grid2">
       <div class="card">
         <h3>Where these mutations are found</h3>
@@ -356,8 +389,7 @@
       <span class="eyebrow">Why this exists</span>
       <p>I built this to make real cancer-genomics data something <b>anyone can explore in a
       browser</b> — see a protein's true 3D shape and exactly where the mutations that drive
-      cancer land on it. It was inspired by a young family member's fight with a rare cancer.
-      It's a <b>research and education tool</b>, not medical advice.</p>
+      cancer land on it. It's a <b>research and education tool</b>, not medical advice.</p>
     </div>
 
     <div class="muted">
@@ -380,6 +412,26 @@ let hotspotCache = null;
 let currentProtein = null;
 let currentHotspots = [];
 let lastHighlights = [];
+let currentEngine = null;  // precomputed dynamics + priority for featured genes
+
+// Gradient colour stops, mirroring cancer_tool/viewer.py.
+const FLEX_STOPS = [[60,90,230],[230,230,230],[220,60,60]];      // rigid → mobile
+const PRIORITY_STOPS = [[40,40,46],[110,92,52],[198,161,91],[178,58,58]]; // low → high
+function lerpColor(v, stops) {
+  v = Math.max(0, Math.min(1, v));
+  if (stops.length === 1) { const [r,g,b]=stops[0]; return `0x${[r,g,b].map(x=>x.toString(16).padStart(2,"0")).join("")}`; }
+  const span = v * (stops.length - 1), i = Math.min(Math.floor(span), stops.length - 2), t = span - i;
+  const c = k => Math.round(stops[i][k] + (stops[i+1][k] - stops[i][k]) * t);
+  return `0x${[c(0),c(1),c(2)].map(x=>x.toString(16).padStart(2,"0")).join("")}`;
+}
+
+async function fetchEngine(gene) {
+  try {
+    const r = await fetch(`data/${gene.toUpperCase()}.json`, { cache: "no-cache" });
+    if (!r.ok) return null;
+    return await r.json();
+  } catch (e) { return null; }
+}
 
 const GENE_INFO = {
   TP53:  { role: "Tumor suppressor", summary: "Makes p53, the cell's emergency brake — it halts damaged cells from dividing and can order broken ones to self-destruct.", matters: "When TP53 is mutated the brake fails and damaged cells keep growing. It's the most commonly mutated gene in human cancer." },
@@ -418,12 +470,27 @@ function addMutation(label) {
   applyMutations();
 }
 
+function removeMutation(label) {
+  const t = label.toUpperCase();
+  $("muts").value = $("muts").value.split(/[,\s]+/).filter(Boolean)
+    .filter(s => s.toUpperCase() !== t).join(", ");
+  applyMutations();
+}
+
+function toggleMutation(label) {
+  const set = new Set($("muts").value.split(/[,\s]+/).filter(Boolean).map(s => s.toUpperCase()));
+  if (set.has(label.toUpperCase())) removeMutation(label); else addMutation(label);
+}
+
+function clearMutations() { $("muts").value = ""; applyMutations(); }
+
 function renderPositionTrack() {
   const box = $("postrack");
   if (!currentProtein) { box.innerHTML = '<div class="track-empty">Load a protein to map its mutation sites along the chain.</div>'; return; }
   const len = currentProtein.length || 1;
   const pct = p => (100 * (p - 1) / Math.max(1, len - 1));
   const maxCount = (currentHotspots[0] && currentHotspots[0].count) || 1;
+  const active = new Set($("muts").value.split(/[,\s]+/).filter(Boolean).map(s => s.toUpperCase()));
   let html = '<div class="axis"></div>'
     + '<span class="end-label" style="left:5px">1</span>'
     + `<span class="end-label" style="right:5px">${len}</span>`;
@@ -431,22 +498,26 @@ function renderPositionTrack() {
     const height = 9 + 27 * Math.sqrt(h.count / maxCount);
     const opacity = (0.4 + 0.6 * (h.count / maxCount)).toFixed(2);
     const mutLabel = h.top ? `${h.residue}${h.top}` : h.residue;
-    html += `<span class="hot-tick" data-mut="${mutLabel}"`
-      + ` data-tip="<b>${h.residue}</b> · ${h.count.toLocaleString()} tumours · click to highlight"`
+    const isOn = active.has(mutLabel.toUpperCase());
+    html += `<span class="hot-tick${isOn ? " on" : ""}" data-mut="${mutLabel}"`
+      + ` data-tip="<b>${h.residue}</b> · ${h.count.toLocaleString()} tumours · click to ${isOn ? "remove" : "add"}"`
       + ` style="left:${pct(h.position)}%;height:${height}px;opacity:${opacity}"></span>`;
   }
   lastHighlights.forEach((m, i) => {
     const color = HIGHLIGHT_COLORS[i % HIGHLIGHT_COLORS.length];
-    html += `<span class="mut-mark" data-tip="<b>${m.label}</b> · your mutation"`
+    html += `<span class="mut-mark" data-rm="${m.label}" data-tip="<b>${m.label}</b> · your mutation · click to remove"`
       + ` style="left:${pct(m.pos)}%;border-top-color:${color}"></span>`;
   });
   box.innerHTML = html;
-  box.querySelectorAll(".hot-tick").forEach(t => { t.onclick = () => addMutation(t.getAttribute("data-mut")); });
+  box.querySelectorAll(".hot-tick").forEach(t => { t.onclick = () => toggleMutation(t.getAttribute("data-mut")); });
+  box.querySelectorAll(".mut-mark").forEach(t => { t.onclick = () => removeMutation(t.getAttribute("data-rm")); });
   box.querySelectorAll("[data-tip]").forEach(el => {
     el.addEventListener("mouseenter", e => showTip(e, el.getAttribute("data-tip")));
     el.addEventListener("mousemove", moveTip);
     el.addEventListener("mouseleave", hideTip);
   });
+  const clearBtn = $("trackClear");
+  if (clearBtn) clearBtn.hidden = lastHighlights.length === 0;
 }
 
 // 3Dmol's zoom() is multiplicative, so track the absolute level and apply the ratio.
@@ -528,14 +599,34 @@ async function fetchHotspots(gene) {
   return out;
 }
 
-function renderStructure(pdb, highlights, byConfidence) {
+function colorResiduesByValue(values, stops) {
+  // values: {resi: 0-1}. Bin to limit draw calls, like the Python viewer.
+  const bins = {};
+  for (const [resi, v] of Object.entries(values)) {
+    const idx = Math.min(11, Math.max(0, Math.floor(v * 12)));
+    (bins[idx] = bins[idx] || []).push(+resi);
+  }
+  for (const [idx, resis] of Object.entries(bins)) {
+    viewer.setStyle({ resi: resis }, { cartoon: { color: lerpColor((+idx + 0.5) / 12, stops) } });
+  }
+}
+
+function renderStructure(pdb, highlights, mode) {
   if (!viewer) viewer = $3Dmol.createViewer($("viewer"), { backgroundColor: "0x0A0A0B" });
   viewer.clear();
   viewer.addModel(pdb, "pdb");
-  if (byConfidence) {
-    viewer.setStyle({}, { cartoon: { colorscheme: { prop: "b", gradient: "roygb", min: 50, max: 90 } } });
+  const eng = currentEngine;
+  if (mode === "flex" && eng && eng.dynamics) {
+    viewer.setStyle({}, { cartoon: { color: "0x404046" } });
+    const vals = {}; eng.dynamics.residue_numbers.forEach((r, i) => vals[r] = eng.dynamics.flexibility[i]);
+    colorResiduesByValue(vals, FLEX_STOPS);
+  } else if (mode === "priority" && eng && eng.priority && eng.priority.length) {
+    viewer.setStyle({}, { cartoon: { color: "0x2a2a2e" } });
+    const max = Math.max(...eng.priority.map(r => r.score)) || 1;
+    const vals = {}; eng.priority.forEach(r => vals[r.position] = r.score / max);
+    colorResiduesByValue(vals, PRIORITY_STOPS);
   } else {
-    viewer.setStyle({}, { cartoon: { color: "spectrum" } });
+    viewer.setStyle({}, { cartoon: { colorscheme: { prop: "b", gradient: "roygb", min: 50, max: 90 } } });
   }
   highlights.forEach((h, i) => {
     const color = HIGHLIGHT_COLORS[i % HIGHLIGHT_COLORS.length];
@@ -548,13 +639,23 @@ function renderStructure(pdb, highlights, byConfidence) {
   currentZoom = 1;
   const z = $("zoom"); if (z) z.value = "1";
   viewer.render();
-  $("legend").innerHTML = byConfidence
-    ? `<span><span class="swatch" style="background:#e63a3a"></span>low confidence</span>
-       <span><span class="swatch" style="background:#f2d641"></span>medium</span>
-       <span><span class="swatch" style="background:#2db84d"></span>good</span>
-       <span><span class="swatch" style="background:#3a6ee6"></span>high <span class="term" title="pLDDT — AlphaFold's per-residue confidence score (0–100) for how sure it is about that part's predicted shape.">(pLDDT)</span></span>
-       ${highlights.length ? '<span>· highlighted spheres = your mutations</span>' : ''}`
-    : (highlights.length ? 'Highlighted spheres mark your mutations. Rainbow = N→C terminus.' : 'Rainbow runs from the start (N) to end (C) of the chain.');
+  const tail = highlights.length ? ' <span>· glowing spheres = your mutations</span>' : '';
+  if (mode === "flex") {
+    $("legend").innerHTML = `<span><span class="swatch" style="background:#3c5ae6"></span>rigid core</span>
+      <span><span class="swatch" style="background:#e6e6e6"></span>intermediate</span>
+      <span><span class="swatch" style="background:#dc3c3c"></span>mobile</span>
+      <span class="term" title="Elastic Network Model normal-mode analysis — intrinsic motion inferred from one structure, no simulation.">(ENM/NMA flexibility)</span>${tail}`;
+  } else if (mode === "priority") {
+    $("legend").innerHTML = `<span><span class="swatch" style="background:#2a2a2e"></span>low</span>
+      <span><span class="swatch" style="background:#6e5c34"></span>·</span>
+      <span><span class="swatch" style="background:#c6a15b"></span>gold</span>
+      <span><span class="swatch" style="background:#b23a3a"></span>highest priority</span>${tail}`;
+  } else {
+    $("legend").innerHTML = `<span><span class="swatch" style="background:#e63a3a"></span>low confidence</span>
+      <span><span class="swatch" style="background:#f2d641"></span>medium</span>
+      <span><span class="swatch" style="background:#2db84d"></span>good</span>
+      <span><span class="swatch" style="background:#3a6ee6"></span>high <span class="term" title="pLDDT — AlphaFold's per-residue confidence score (0–100) for how sure it is about that part's predicted shape.">(pLDDT)</span></span>${tail}`;
+  }
 }
 
 function renderDetails(p) {
@@ -625,6 +726,53 @@ function renderHotspots(list) {
   box.querySelectorAll("tr.hot").forEach(tr => tr.onclick = () => addMutation(tr.getAttribute("data-mut")));
 }
 
+function renderPriority(eng) {
+  const box = $("priority");
+  if (!eng || !eng.priority || !eng.priority.length) {
+    box.innerHTML = '<div class="muted">Precomputed priority ranking is available for the featured genes (TP53, KRAS, BRAF, KIT, FLT3, IDH2, PTEN, EGFR). For other genes, the live hotspots panel below still works.</div>';
+    return;
+  }
+  const max = Math.max(...eng.priority.map(r => r.score)) || 1;
+  const pip = (v, title) => `<span class="pip" title="${title}: ${(+v).toFixed(2)}"><i style="transform:scaleX(${Math.max(0,Math.min(1,v))})"></i></span>`;
+  const rows = eng.priority.slice(0, 15).map(r => {
+    const col = lerpColor(r.score / max, PRIORITY_STOPS).replace("0x", "#");
+    return `<tr class="hot" data-pos="${r.position}" title="Click to highlight ${r.residue}">
+      <td><b>${r.residue}</b></td>
+      <td><div class="scorecell"><div class="track"><div class="fill" style="width:${100*r.score/max}%;background:${col}"></div></div><span class="num">${Math.round(r.score)}</span></div></td>
+      <td><div class="axes">${pip(r.recurrence,"Recurrence")}${pip(r.pathogenicity,"Pathogenicity")}${pip(r.druggability,"Druggability")}${pip(r.criticality,"Criticality")}</div></td>
+      <td class="why">${r.rationale}</td>
+    </tr>`;
+  }).join("");
+  let summary = "";
+  if (eng.dynamics) summary += `<div class="dyn-line"><b>Folding dynamics:</b> ENM/NMA over ${eng.dynamics.n_modes} modes · hinge/pivot residues ${eng.dynamics.hinges.slice(0,6).join(", ") || "—"}.</div>`;
+  if (eng.pockets && eng.pockets.length) { const p = eng.pockets[0]; summary += `<div class="dyn-line"><b>Druggability:</b> ${eng.pockets.length} pocket(s) detected; top ${p.volume} Å³, druggability ${(+p.druggability).toFixed(2)}.</div>`; }
+  if (eng.targets && eng.targets.tractability && eng.targets.tractability.length) {
+    const mods = [...new Set(eng.targets.tractability.map(t => t.modality))];
+    const dis = eng.targets.top_diseases && eng.targets.top_diseases.length ? ` · top link: ${eng.targets.top_diseases[0].name}` : "";
+    summary += `<div class="dyn-line"><b>Open Targets:</b> tractable via ${mods.join(", ")}${dis}.</div>`;
+  }
+  box.innerHTML = `<table><thead><tr><th>Residue</th><th>Priority</th><th>Recur · Path · Drug · Crit</th><th>Why it ranks here</th></tr></thead><tbody>${rows}</tbody></table>
+    <div class="muted" style="margin-top:8px">Priority = 0.30·recurrence + 0.35·pathogenicity + 0.20·druggability + 0.15·structural criticality. Pathogenicity from DeepMind <b>AlphaMissense</b>; criticality from <b>ENM/NMA</b> dynamics. <b>Click a row</b> to drop it onto the 3D structure.</div>${summary}`;
+  box.querySelectorAll("tr.hot").forEach(tr => tr.onclick = () => {
+    const pos = +tr.getAttribute("data-pos");
+    const hit = currentHotspots.find(x => x.position === pos);
+    const row = eng.priority.find(x => x.position === pos);
+    const wt = (row && row.wt) || (hit && hit.residue[0]) || "";
+    const mut = hit && hit.top && wt ? `${wt}${pos}${hit.top}` : null;
+    if (mut) addMutation(mut);
+  });
+}
+
+function updateColorModeAvailability() {
+  const has = !!(currentEngine && currentEngine.dynamics);
+  const sel = $("colormode");
+  [...sel.options].forEach(o => { if (o.value !== "plddt") o.disabled = !has; });
+  if (!has && sel.value !== "plddt") sel.value = "plddt";
+  $("engineNote").textContent = has
+    ? "Dynamics & priority colouring loaded for this gene."
+    : "Dynamics & priority colouring are precomputed for the featured genes; this gene uses live data only.";
+}
+
 let lastPdb = null;
 // rerender=false refreshes only the text/track, preserving the current rotation and zoom.
 function applyMutations(rerender = true) {
@@ -636,7 +784,7 @@ function applyMutations(rerender = true) {
     if (v.ok) highlights.push(mut); else errs.push(v.msg);
   }
   lastHighlights = highlights;
-  if (rerender) renderStructure(lastPdb, highlights, $("plddt").checked);
+  if (rerender) renderStructure(lastPdb, highlights, $("colormode").value);
   renderPositionTrack();
   if (errs.length) { setStatus("⚠️ " + errs.join(" "), "err"); return; }
   if (highlights.length) {
@@ -658,7 +806,8 @@ async function load() {
   $("proteinTitle").textContent = gene;
   const sk = '<div class="skeleton sk-line" style="width:85%"></div><div class="skeleton sk-line" style="width:96%"></div><div class="skeleton sk-line" style="width:62%"></div>';
   $("about").innerHTML = sk; $("details").innerHTML = sk;
-  $("hotspots").innerHTML = sk; $("cancerTypes").innerHTML = sk;
+  $("hotspots").innerHTML = sk; $("cancerTypes").innerHTML = sk; $("priority").innerHTML = sk;
+  currentEngine = null;
   try {
     const protein = await fetchProtein(gene);
     if (!protein) { setStatus(`No reviewed human protein found for <b>${gene}</b>. Check the symbol.`, "err"); return; }
@@ -666,14 +815,18 @@ async function load() {
     currentHotspots = [];
     renderDetails(protein);
     renderAbout(protein);
+    const enginePromise = fetchEngine(gene);  // precomputed dynamics/priority (featured genes)
     lastPdb = await fetchStructure(protein.accession);
+    currentEngine = await enginePromise;
+    updateColorModeAvailability();
     applyMutations();
     // Hotspots are best-effort and must not block the structure render.
     fetchHotspots(gene).then(list => {
       renderHotspots(list);
       renderCancerTypes(list);
+      renderPriority(currentEngine);
       applyMutations(false);
-    }).catch(() => { renderHotspots([]); renderCancerTypes([]); });
+    }).catch(() => { renderHotspots([]); renderCancerTypes([]); renderPriority(currentEngine); });
   } catch (e) {
     setStatus("Error: " + e.message, "err");
   }
@@ -684,9 +837,10 @@ $("examples").querySelectorAll(".chip").forEach(c => c.onclick = () => { $("gene
 $("load").onclick = load;
 $("gene").addEventListener("keydown", e => { if (e.key === "Enter") load(); });
 $("muts").addEventListener("change", applyMutations);
-$("plddt").addEventListener("change", applyMutations);
+$("colormode").addEventListener("change", applyMutations);
 $("zoom").addEventListener("input", e => setZoom(+e.target.value));
 $("resetView").onclick = () => { if (!viewer) return; viewer.zoomTo(); currentZoom = 1; $("zoom").value = "1"; viewer.render(); };
+$("trackClear").onclick = clearMutations;
 
 try { if (!localStorage.getItem("cpe_seen")) $("firstrun").hidden = false; } catch (e) {}
 $("firstrunX").onclick = () => { $("firstrun").hidden = true; try { localStorage.setItem("cpe_seen", "1"); } catch (e) {} };
