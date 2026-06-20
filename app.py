@@ -267,7 +267,6 @@ with st.spinner("Analysing structure, dynamics and variant effects…"):
         hotspots, pathos, dyn, pocket_list, protein["sequence"]
     )
 
-# Per-residue colour maps for the viewer.
 flex_map = dynamics.flexibility_by_position(dyn) if dyn else {}
 max_score = max((r["score"] for r in priority_rows), default=0.0) or 1.0
 priority_map = {r["position"]: r["score"] / max_score for r in priority_rows}
@@ -312,7 +311,6 @@ with info_col:
     if highlights:
         st.success("Highlighted: " + ", ".join(h["label"] for h in highlights))
 
-    # Dynamics summary
     st.subheader("Folding dynamics")
     if dyn:
         rank = sorted(
@@ -333,7 +331,6 @@ with info_col:
     else:
         st.caption("Dynamics analysis unavailable for this structure.")
 
-    # Druggability + Open Targets
     st.subheader("Druggability")
     if pocket_list:
         top = pocket_list[0]
