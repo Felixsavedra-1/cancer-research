@@ -49,7 +49,7 @@ const H = 860;
     console.error('  (content did not fully populate in time — continuing)');
   }
 
-  await page.waitForTimeout(4500);
+  await page.waitForTimeout(1500);
 
   console.log('SCROLL_START_SEC=' + ((Date.now() - t0) / 1000).toFixed(2));
 
@@ -74,7 +74,7 @@ const H = 860;
 
     const el = pickScroller();
     const max = el.scrollHeight - el.clientHeight;
-    const duration = 9000;
+    const duration = 5000;
     const ease = (t) => 0.5 - 0.5 * Math.cos(Math.PI * t);
     await new Promise((resolve) => {
       const start = performance.now();
@@ -88,7 +88,7 @@ const H = 860;
     });
   });
 
-  await page.waitForTimeout(1200);
+  await page.waitForTimeout(800);
 
   const video = page.video();
   await context.close();
