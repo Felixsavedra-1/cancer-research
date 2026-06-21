@@ -95,6 +95,35 @@ def test_empty_hotspots_returns_empty():
     assert scoring.score_residues([], _pathogenicity(), _dynamics(), _pockets(), SEQUENCE) == []
 
 
+def test_low_confidence_suppresses_criticality():
+    # Position 5 is rigid (criticality 0.63 at full confidence) but in a disordered,
+    # low-pLDDT region — its structural criticality should fade to ~0.
+    dynamics = {**_dynamics(), "plddt": [30.0, 95.0]}
+    rows = scoring.score_residues(
+        _hotspots(), _pathogenicity(), dynamics, _pockets(), SEQUENCE
+    )
+    pos5 = next(r for r in rows if r["position"] == 5)
+    assert pos5["criticality"] == 0.0
+
+
+def test_weights_perturbation_keeps_top_driver():
+    # A genuine driver should top the ranking regardless of how the four axes are
+    # balanced — ±25% on each axis independently must not dethrone it.
+    top = scoring.score_residues(
+        _hotspots(), _pathogenicity(), _dynamics(), _pockets(), SEQUENCE
+    )[0]["position"]
+    factors = [0.75, 1.25, 0.75, 1.25]
+    for shift in range(4):
+        weights = {
+            k: v * factors[(i + shift) % 4]
+            for i, (k, v) in enumerate(scoring.DEFAULT_WEIGHTS.items())
+        }
+        rows = scoring.score_residues(
+            _hotspots(), _pathogenicity(), _dynamics(), _pockets(), SEQUENCE, weights=weights
+        )
+        assert rows[0]["position"] == top
+
+
 def test_custom_weights_override():
     weights = {"recurrence": 1.0, "pathogenicity": 0.0, "druggability": 0.0, "criticality": 0.0}
     rows = scoring.score_residues(

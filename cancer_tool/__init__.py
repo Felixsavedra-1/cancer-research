@@ -17,4 +17,4 @@ from . import (  # noqa: F401
     viewer,
 )
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"

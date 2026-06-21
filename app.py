@@ -54,7 +54,6 @@ h1, h2, h3 {
 }
 [data-testid="stCaptionContainer"], .stCaption { font-family: var(--mono); color: var(--grey); }
 
-/* Brand masthead */
 .vr-masthead { margin: 0 0 4px; }
 .vr-designation {
   font-family: var(--mono); font-size: .72rem; letter-spacing: .18em;
@@ -67,7 +66,6 @@ h1, h2, h3 {
 .vr-mark a { color: var(--grey); text-decoration: none; }
 .vr-mark a:hover { color: var(--bone); }
 
-/* Buttons */
 .stButton button, .stDownloadButton button {
   background: var(--gold); color: var(--black);
   border: 1px solid var(--gold); border-radius: 2px;
@@ -78,7 +76,6 @@ h1, h2, h3 {
   background: var(--bone); border-color: var(--bone); color: var(--black);
 }
 
-/* Inputs */
 [data-testid="stTextInput"] input,
 [data-testid="stTextArea"] textarea,
 [data-baseweb="select"] > div {
@@ -91,14 +88,12 @@ h1, h2, h3 {
   border-color: var(--gold) !important; box-shadow: none !important;
 }
 
-/* Alerts / disclaimer */
 [data-testid="stAlert"] {
   background: rgba(178,58,58,.07) !important;
   border: 1px solid var(--crimson) !important; border-radius: 2px !important;
   color: #d98d8d !important;
 }
 
-/* Tables & links */
 [data-testid="stTable"] th, [data-testid="stDataFrame"] th {
   font-family: var(--mono); text-transform: uppercase; letter-spacing: .12em;
   font-size: .66rem; color: var(--grey);

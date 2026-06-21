@@ -12,8 +12,8 @@
   :root {
     --black: #0A0A0B; --black-2: #111113; --panel: #141417;
     --line: #26262B; --line-soft: #19191D;
-    --bone: #E8E3D6; --grey: #8C8C93; --grey-dim: #5C5C63;
-    --gold: #C6A15B; --gold-dim: #6e5c34; --crimson: #B23A3A;
+    --bone: #E8E3D6; --grey: #9a9aa2; --grey-dim: #74747c;
+    --gold: #D2B06B; --gold-dim: #6e5c34; --crimson: #C24A4A;
     --display: 'Spectral', Georgia, serif;
     --body: 'Hanken Grotesk', system-ui, -apple-system, sans-serif;
     --mono: 'IBM Plex Mono', ui-monospace, monospace;
@@ -38,8 +38,12 @@
   body > * { position: relative; z-index: 1; }
 
   .eyebrow {
-    font-family: var(--mono); font-size: .7rem; letter-spacing: .22em;
+    font-family: var(--mono); font-size: .74rem; letter-spacing: .22em;
     text-transform: uppercase; color: var(--grey);
+  }
+  .caveat {
+    margin: 12px 0 0; padding-left: 10px; border-left: 2px solid var(--gold-dim);
+    font-size: .82rem; line-height: 1.5; color: var(--grey);
   }
 
   header { border-bottom: 1px solid var(--line); }
@@ -53,13 +57,11 @@
     height: 58px; padding: 0 24px;
   }
   .brand { display: flex; align-items: center; gap: 12px; }
-  .divider { color: var(--grey-dim); }
-  .mark { font-family: var(--mono); font-size: .86rem; letter-spacing: .14em; }
-  .backlink {
-    font-family: var(--mono); font-size: .8rem; letter-spacing: .12em;
-    color: var(--grey); transition: color .2s ease;
+  .mark {
+    font-family: var(--mono); font-size: .86rem; letter-spacing: .14em;
+    color: var(--bone); text-decoration: none; transition: color .2s ease;
   }
-  .backlink:hover { color: var(--bone); }
+  .mark:hover { color: var(--gold); }
   .masthead { padding: 26px 24px 20px; }
   .masthead .designation {
     font-family: var(--mono); font-size: .72rem; letter-spacing: .18em;
@@ -95,7 +97,7 @@
   textarea { resize: vertical; min-height: 52px; }
   .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
   .chip {
-    padding: .3em .65em; font-family: var(--mono); font-size: .68rem; letter-spacing: .08em;
+    padding: .3em .65em; font-family: var(--mono); font-size: .72rem; letter-spacing: .08em;
     text-transform: uppercase; border-radius: 2px; cursor: pointer;
     background: transparent; border: 1px solid var(--line); color: var(--grey);
     transition: color .2s ease, border-color .2s ease;
@@ -141,7 +143,7 @@
   a { color: var(--gold); }
   table { width: 100%; border-collapse: collapse; font-size: .88rem; }
   th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); }
-  th { color: var(--grey); font-family: var(--mono); font-weight: 500; font-size: .66rem;
+  th { color: var(--grey); font-family: var(--mono); font-weight: 500; font-size: .72rem;
     letter-spacing: .12em; text-transform: uppercase; }
   tr.hot { cursor: pointer; }
   tr.hot:hover { background: var(--black-2); }
@@ -168,7 +170,7 @@
   @keyframes spin { to { transform: rotate(360deg); } }
 
   .viewer-sub { color: var(--grey); font-size: .9rem; margin: -4px 0 12px; }
-  .badge { display: inline-block; font-family: var(--mono); font-size: .64rem; letter-spacing: .14em;
+  .badge { display: inline-block; font-family: var(--mono); font-size: .7rem; letter-spacing: .14em;
     text-transform: uppercase; padding: .3em .6em; border-radius: 2px; border: 1px solid var(--line);
     color: var(--grey); vertical-align: middle; }
   .badge.onco { color: var(--gold); border-color: var(--gold-dim); background: rgba(198,161,91,.08); }
@@ -194,7 +196,7 @@
   /* Linear position map */
   .track-wrap { margin-top: 14px; }
   .track-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 7px; flex-wrap: wrap; }
-  .track-head .t-title { font-family: var(--mono); font-size: .66rem; letter-spacing: .12em; text-transform: uppercase; color: var(--grey); }
+  .track-head .t-title { font-family: var(--mono); font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--grey); }
   .track-head .t-sub { font-size: .76rem; color: var(--grey-dim); }
   .postrack { position: relative; height: 48px; background: var(--black-2); border: 1px solid var(--line); border-radius: 2px; }
   .postrack .axis { position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: var(--line); }
@@ -208,7 +210,7 @@
     cursor: pointer; transition: filter .15s ease; }
   .mut-mark::before { content: ""; position: absolute; left: -8px; right: -8px; top: -4px; bottom: -9px; }
   .mut-mark:hover { filter: brightness(1.35); }
-  .track-clear { font-family: var(--mono); font-size: .64rem; letter-spacing: .1em; text-transform: uppercase;
+  .track-clear { font-family: var(--mono); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase;
     color: var(--grey); background: transparent; border: 1px solid var(--line); border-radius: 2px;
     padding: 2px 7px; cursor: pointer; transition: color .2s ease, border-color .2s ease; }
   .track-clear[hidden] { display: none; }
@@ -233,7 +235,7 @@
 
   /* Reset-view button */
   .view-reset { position: absolute; right: 12px; top: 12px; z-index: 5; font-family: var(--mono);
-    font-size: .64rem; letter-spacing: .1em; text-transform: uppercase; color: var(--grey);
+    font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--grey);
     background: rgba(10,10,11,.55); border: 1px solid var(--line); border-radius: 2px; padding: 5px 8px; cursor: pointer; }
   .view-reset:hover { color: var(--bone); border-color: var(--gold-dim); }
 
@@ -250,9 +252,7 @@
 <div class="topbar">
   <div class="topbar-inner">
     <div class="brand">
-      <span class="mark">Vedra Research</span>
-      <span class="divider">|</span>
-      <a class="backlink" href="https://vedraresearch.github.io/Vedra-Research/">Portfolio</a>
+      <a class="mark" href="https://vedraresearch.github.io/Vedra-Research/">Vedra Research</a>
     </div>
   </div>
 </div>
@@ -307,6 +307,10 @@
       <b>mutations</b> that change a single building block (amino acid) of a protein.
       Type a mutation like <code>R175H</code> to see exactly where on the protein it lands —
       mutations buried in the protein's core often break its function.
+      <p class="caveat">Scope: single-chain (monomer) models only; pockets come from a
+      LIGSITE-style geometric scan, not a chemistry-aware docking method; folding dynamics
+      are down-weighted by AlphaFold pLDDT confidence. The ranking rediscovers known biology
+      but is <b>not clinically validated</b> — research and education use only.</p>
     </details>
   </aside>
 
@@ -528,13 +532,19 @@ function setZoom(v) {
   viewer.render();
 }
 
+const AA3 = {ALA:"A",ARG:"R",ASN:"N",ASP:"D",CYS:"C",GLN:"Q",GLU:"E",GLY:"G",HIS:"H",
+  ILE:"I",LEU:"L",LYS:"K",MET:"M",PHE:"F",PRO:"P",SER:"S",THR:"T",TRP:"W",TYR:"Y",VAL:"V",TER:"*"};
+// Accept three-letter codes (ARG175HIS) by collapsing them to one-letter (R175H).
+const to1 = aa => AA3[aa.toUpperCase()] || aa;
+
 function parseMutations(text) {
   const tokens = (text || "").split(/[,\s]+/).filter(Boolean);
-  const re = /^([A-Za-z])(\d+)([A-Za-z*])$/;
+  const one = /^([A-Za-z])(\d+)([A-Za-z*])$/;
+  const three = /^([A-Za-z]{3})(\d+)([A-Za-z]{3}|\*)$/;
   const parsed = [], bad = [];
   for (const t of tokens) {
-    const m = t.match(re);
-    if (m) parsed.push({ wt: m[1].toUpperCase(), pos: +m[2], mut: m[3].toUpperCase(), label: t.toUpperCase() });
+    const m = t.match(one) || t.match(three);
+    if (m) parsed.push({ wt: to1(m[1]).toUpperCase(), pos: +m[2], mut: to1(m[3]).toUpperCase(), label: `${to1(m[1])}${m[2]}${to1(m[3])}`.toUpperCase() });
     else bad.push(t);
   }
   return { parsed, bad };
@@ -740,7 +750,7 @@ function renderPriority(eng) {
       <td><b>${r.residue}</b></td>
       <td><div class="scorecell"><div class="track"><div class="fill" style="width:${100*r.score/max}%;background:${col}"></div></div><span class="num">${Math.round(r.score)}</span></div></td>
       <td><div class="axes">${pip(r.recurrence,"Recurrence")}${pip(r.pathogenicity,"Pathogenicity")}${pip(r.druggability,"Druggability")}${pip(r.criticality,"Criticality")}</div></td>
-      <td class="why">${r.rationale}</td>
+      <td class="why" title="${r.rationale}">${r.rationale}</td>
     </tr>`;
   }).join("");
   let summary = "";
@@ -760,6 +770,7 @@ function renderPriority(eng) {
     const wt = (row && row.wt) || (hit && hit.residue[0]) || "";
     const mut = hit && hit.top && wt ? `${wt}${pos}${hit.top}` : null;
     if (mut) addMutation(mut);
+    else setStatus(`<b>${(row && row.residue) || pos}</b> is a recurrent region (e.g. an in-frame deletion) with no single-residue substitution to drop onto the structure.`, "info");
   });
 }
 

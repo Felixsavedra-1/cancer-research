@@ -32,17 +32,36 @@ def _most_common_variant(variants: dict) -> str | None:
     return max(variants.items(), key=lambda kv: int(kv[1]))[0]
 
 
-def _criticality(position: int, rigidity: dict[int, float], hinges: set[int]) -> float:
+def _confidence(plddt: float | None) -> float:
+    """Scale an ENM signal by AlphaFold confidence: <50 (disordered) → 0, >90 → 1.
+
+    ENM modes from low-pLDDT regions (typically disordered tails) are unreliable, so
+    a residue's structural criticality should fade out where the model isn't trusted.
+    Absent pLDDT (e.g. a hand-built dynamics dict) defaults to full confidence.
+    """
+    if plddt is None:
+        return 1.0
+    return min(1.0, max(0.0, (plddt - 50.0) / 40.0))
+
+
+def _criticality(
+    position: int,
+    rigidity: dict[int, float],
+    hinges: set[int],
+    plddt: dict[int, float],
+) -> float:
     """Structural load-bearing signal in 0–1: rigid core + hinge proximity.
 
     NMA rigidity is a strong proxy for burial — buried core residues barely
     fluctuate — so a separate solvent-accessibility term would be largely redundant.
     Hinge proximity adds the functionally critical domain-pivot sites that aren't
-    necessarily the most rigid.
+    necessarily the most rigid. The whole term is scaled by AlphaFold confidence so
+    low-pLDDT regions don't masquerade as critical.
     """
     rigid = rigidity.get(position, 0.0)
     near_hinge = any(abs(position - h) <= HINGE_WINDOW for h in hinges)
-    return min(1.0, 0.7 * rigid + (0.3 if near_hinge else 0.0))
+    base = min(1.0, 0.7 * rigid + (0.3 if near_hinge else 0.0))
+    return base * _confidence(plddt.get(position))
 
 
 def _rationale(components: dict, n_tumours: int, am_label: str | None) -> str:
@@ -90,6 +109,7 @@ def score_residues(
 
     rigidity = dyn.rigidity_by_position(dynamics) if dynamics else {}
     hinges = set(dynamics.get("hinges", [])) if dynamics else set()
+    plddt = dyn.plddt_by_position(dynamics) if dynamics else {}
 
     max_count = max((h.get("count", 0) for h in hotspots), default=0)
 
@@ -115,7 +135,7 @@ def score_residues(
                 am_class = variant["class"]
 
         druggability = pock.pocket_proximity(position, pockets)
-        criticality = _criticality(position, rigidity, hinges)
+        criticality = _criticality(position, rigidity, hinges, plddt)
 
         components = {
             "recurrence": recurrence,

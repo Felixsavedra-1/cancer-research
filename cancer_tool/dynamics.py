@@ -55,12 +55,24 @@ def _zero_crossings(vector: np.ndarray) -> list[int]:
     return [i for i in range(1, len(signs)) if signs[i] != signs[i - 1]]
 
 
+def _normalize(values: np.ndarray) -> np.ndarray:
+    """Min–max scale to 0–1; returns all-zeros for a flat/empty input."""
+    values = np.asarray(values, dtype=float)
+    if values.size == 0:
+        return values
+    lo, hi = float(values.min()), float(values.max())
+    if hi - lo < 1e-12:
+        return np.zeros_like(values)
+    return (values - lo) / (hi - lo)
+
+
 def compute_dynamics(pdb_text: str, n_modes: int = DEFAULT_MODES) -> dict:
     """Run ENM/NMA on a structure and summarise its intrinsic dynamics.
 
     Returns (all per-residue lists aligned to ``residue_numbers``)::
 
         {"residue_numbers": [int, ...],
+         "plddt": [0-100, ...],            # AlphaFold per-residue confidence
          "flexibility": [0-1, ...],        # GNM square fluctuations, 0 rigid → 1 mobile
          "rigidity": [0-1, ...],           # 1 - flexibility
          "hinges": [int, ...],             # slowest-mode zero-crossings (domain pivots)
@@ -72,6 +84,8 @@ def compute_dynamics(pdb_text: str, n_modes: int = DEFAULT_MODES) -> dict:
     calphas = _parse_calphas(pdb_text)
     n_atoms = calphas.numAtoms()
     resnums = [int(n) for n in calphas.getResnums()]
+    # AlphaFold stores per-residue pLDDT confidence (0–100) in the B-factor column.
+    plddt = [round(float(b), 1) for b in calphas.getBetas()]
     # Can't request more non-trivial modes than the system supports.
     n_modes = max(1, min(n_modes, n_atoms - 1))
 
@@ -96,23 +110,13 @@ def compute_dynamics(pdb_text: str, n_modes: int = DEFAULT_MODES) -> dict:
 
     return {
         "residue_numbers": resnums,
+        "plddt": plddt,
         "flexibility": [round(float(x), 4) for x in flexibility],
         "rigidity": [round(float(1.0 - x), 4) for x in flexibility],
         "hinges": hinges,
         "collective_motion": [round(float(x), 4) for x in collective],
         "n_modes": int(gnm.numModes()),
     }
-
-
-def _normalize(values: np.ndarray) -> np.ndarray:
-    """Min–max scale to 0–1; returns all-zeros for a flat/empty input."""
-    values = np.asarray(values, dtype=float)
-    if values.size == 0:
-        return values
-    lo, hi = float(values.min()), float(values.max())
-    if hi - lo < 1e-12:
-        return np.zeros_like(values)
-    return (values - lo) / (hi - lo)
 
 
 def flexibility_by_position(dynamics: dict) -> dict[int, float]:
@@ -123,3 +127,8 @@ def flexibility_by_position(dynamics: dict) -> dict[int, float]:
 def rigidity_by_position(dynamics: dict) -> dict[int, float]:
     """Map residue number → normalised rigidity (1 − flexibility)."""
     return dict(zip(dynamics["residue_numbers"], dynamics["rigidity"]))
+
+
+def plddt_by_position(dynamics: dict) -> dict[int, float]:
+    """Map residue number → AlphaFold pLDDT confidence (0–100)."""
+    return dict(zip(dynamics["residue_numbers"], dynamics.get("plddt", [])))

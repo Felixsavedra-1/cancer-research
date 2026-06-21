@@ -11,6 +11,7 @@ Usage::
 from __future__ import annotations
 
 import json
+import re
 import sys
 import time
 from datetime import date
@@ -21,6 +22,7 @@ sys.path.insert(0, str(ROOT))
 
 import requests  # noqa: E402
 
+import cancer_tool  # noqa: E402
 from cancer_tool import (  # noqa: E402
     dynamics,
     mutations,
@@ -37,13 +39,19 @@ TOP_N = 30
 DATA_DIR = ROOT / "data"
 
 
+SOURCES = ["UniProt", "AlphaFold DB", "AlphaMissense", "cancerhotspots.org", "Open Targets"]
+
+
 def build_gene(gene: str, session: requests.Session) -> dict | None:
     protein = uniprot.get_protein(gene, session=session)
     if not protein:
         print(f"  ! no UniProt record for {gene}")
         return None
 
+    model_url = structures.resolve_pdb_url(protein["accession"], session=session)
     pdb = structures.fetch_alphafold_pdb(protein["accession"], session=session)
+    version_match = re.search(r"-model_(v\d+)", model_url)
+    model_version = version_match.group(1) if version_match else "unknown"
     hotspots = mutations.fetch_hotspots(gene, session=session)
     pathos = pathogenicity.fetch_alphamissense(protein["accession"], session=session)
     try:
@@ -59,11 +67,17 @@ def build_gene(gene: str, session: requests.Session) -> dict | None:
         "accession": protein["accession"],
         "name": protein["name"],
         "length": protein["length"],
-        "generated": date.today().isoformat(),
+        "provenance": {
+            "tool_version": cancer_tool.__version__,
+            "alphafold_model": model_version,
+            "fetched": date.today().isoformat(),
+            "sources": SOURCES,
+        },
         "priority": rows[:TOP_N],
         "dynamics": (
             {
                 "residue_numbers": dyn["residue_numbers"],
+                "plddt": dyn["plddt"],
                 "flexibility": dyn["flexibility"],
                 "hinges": dyn["hinges"],
                 "n_modes": dyn["n_modes"],
@@ -77,6 +91,19 @@ def build_gene(gene: str, session: requests.Session) -> dict | None:
         ],
         "targets": context,
     }
+
+
+def validate_payload(payload: dict) -> None:
+    """Fail loudly on a malformed gene payload before it's written or trusted."""
+    for key in ("gene", "accession", "name", "length", "provenance", "priority"):
+        if key not in payload:
+            raise ValueError(f"{payload.get('gene', '?')}: missing '{key}'")
+    if not isinstance(payload["priority"], list) or not payload["priority"]:
+        raise ValueError(f"{payload['gene']}: empty priority list")
+    for row in payload["priority"]:
+        missing = {"position", "residue", "score", "rationale"} - row.keys()
+        if missing:
+            raise ValueError(f"{payload['gene']}: priority row missing {missing}")
 
 
 def main(argv: list[str]) -> int:
@@ -96,6 +123,7 @@ def main(argv: list[str]) -> int:
             continue
         if not payload:
             continue
+        validate_payload(payload)
         out = DATA_DIR / f"{gene}.json"
         out.write_text(json.dumps(payload, indent=2))
         top_residue = payload["priority"][0]["residue"] if payload["priority"] else None

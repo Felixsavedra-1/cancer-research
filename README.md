@@ -148,6 +148,23 @@ fixture), and AlphaMissense parsing all run with no Streamlit/UI or HTTP depende
 </details>
 
 <details>
+<summary><b>Limitations</b></summary>
+
+Honest scope, so the rankings aren't over-read:
+
+- **Single-chain only.** Analysis runs on the AlphaFold monomer; assembly/interface
+  dynamics of multimers (e.g. the p53 tetramer) are not modelled.
+- **Pockets are geometric.** A LIGSITE-style scan finds enclosed cavities by shape; it
+  does not assess lipophilicity, desolvation, or true ligandability.
+- **Confidence-aware, not confidence-proof.** Structural criticality is down-weighted by
+  AlphaFold pLDDT, but low-confidence regions still carry more uncertainty than the score
+  conveys.
+- **Not clinically validated.** The ranking rediscovers known driver biology, but the
+  composite weights are expert-set, not trained on outcome data.
+
+</details>
+
+<details>
 <summary><b>Disclaimer</b></summary>
 
 ⚠️ **Research and education use only.** This is not a medical device. It must

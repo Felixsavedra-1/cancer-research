@@ -1,0 +1,39 @@
+cff-version: 1.2.0
+title: Cancer Protein Explorer
+message: "If you use this tool, please cite it and the underlying data sources below."
+type: software
+authors:
+  - family-names: Savedra
+    given-names: Felix
+repository-code: "https://github.com/Felixsavedra-1/Cancer-Research-tool"
+license: MIT
+version: 0.3.0
+references:
+  - type: article
+    title: "Highly accurate protein structure prediction with AlphaFold"
+    authors:
+      - family-names: Jumper
+        given-names: John
+    doi: 10.1038/s41586-021-03819-2
+    year: 2021
+  - type: article
+    title: "Accurate proteome-wide missense variant effect prediction with AlphaMissense"
+    authors:
+      - family-names: Cheng
+        given-names: Jun
+    doi: 10.1126/science.adg7492
+    year: 2023
+  - type: article
+    title: "ProDy: Protein Dynamics Inferred from Theory and Experiments"
+    authors:
+      - family-names: Bakan
+        given-names: Ahmet
+    doi: 10.1093/bioinformatics/btr168
+    year: 2011
+  - type: database
+    title: "UniProt: the Universal Protein Knowledgebase"
+    notes: "UniProt Consortium"
+  - type: database
+    title: "cancerhotspots.org — recurrent cancer mutation hotspots"
+  - type: database
+    title: "Open Targets Platform — target tractability and disease associations"

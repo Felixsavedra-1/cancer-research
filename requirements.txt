@@ -1,8 +1,10 @@
-streamlit>=1.32
-py3Dmol>=2.0
-requests>=2.31
-pandas>=2.0
-prody>=2.4
-numpy>=1.24
-scipy>=1.10
-pytest>=8.0
+# Pinned for reproducibility: the scientific stack (ProDy/NumPy/SciPy) determines the
+# dynamics output, so drift there silently changes rankings. Bump deliberately.
+streamlit~=1.32
+py3Dmol~=2.0
+requests~=2.31
+pandas~=2.0
+prody~=2.6
+numpy>=1.26,<3
+scipy>=1.10,<2
+pytest~=8.0

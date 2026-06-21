@@ -64,3 +64,12 @@ def test_lookup_helpers_align_positions():
     assert set(flex_map) == set(result["residue_numbers"])
     rigid_map = dynamics.rigidity_by_position(result)
     assert math.isclose(flex_map[6] + rigid_map[6], 1.0, abs_tol=1e-3)
+
+
+def test_plddt_is_read_from_b_factors():
+    # The synthetic helix carries B-factor 50.00 on every Cα.
+    result = dynamics.compute_dynamics(_alpha_helix_pdb(12))
+    assert len(result["plddt"]) == 12
+    assert all(b == 50.0 for b in result["plddt"])
+    plddt_map = dynamics.plddt_by_position(result)
+    assert set(plddt_map) == set(result["residue_numbers"])
