@@ -1,6 +1,5 @@
-// Record the README hero GIF source (.webm): scripted-scroll cancer-explorer.html in
-// headless Chromium, then convert with make_demo_gif.sh. Serve the repo first
-// (python3 -m http.server 8766). Env: DEMO_URL, OUT_DIR, HEADLESS, CHROME_PATH.
+// Record the README hero GIF source (.webm) by scripted-scrolling cancer-explorer.html in
+// headless Chromium; encode with make_demo_gif.sh. Serve the repo first (http.server 8766).
 const { chromium } = require('playwright');
 const fs = require('fs');
 

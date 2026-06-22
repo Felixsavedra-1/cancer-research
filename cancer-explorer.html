@@ -92,7 +92,6 @@
   }
   .subbar b { color: #c98f8f; font-weight: 500; }
 
-  /* Beginner / Expert detail levels */
   body.mode-beginner .expert-only { display: none !important; }
   body.mode-expert .beginner-only { display: none !important; }
   .modehint { font-size: .86rem; line-height: 1.55; color: var(--grey); margin-bottom: 12px;
@@ -209,12 +208,10 @@
   .note p { margin: 10px 0 0; color: var(--grey); font-size: .92rem; max-width: 70ch; }
   .note p b { color: var(--bone); font-weight: 500; }
 
-  /* Stage: viewer + context rail */
   .stage { display: grid; grid-template-columns: minmax(0,1fr) clamp(264px, 24vw, 326px); gap: 18px; align-items: start; }
   .context { display: flex; flex-direction: column; gap: 18px; }
   @media (max-width: 1040px) { .stage { grid-template-columns: 1fr; } .context { order: -1; } }
 
-  /* Linear position map */
   .track-wrap { margin-top: 14px; }
   .track-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 7px; flex-wrap: wrap; }
   .track-head .t-title { font-family: var(--mono); font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--grey); }
@@ -238,29 +235,24 @@
   .track-clear:hover { color: var(--bone); border-color: var(--gold-dim); }
   .track-empty { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--grey-dim); font-size: .8rem; }
 
-  /* Floating tooltip */
   #tip { position: fixed; z-index: 50; pointer-events: none; opacity: 0; transition: opacity .12s ease;
     background: var(--black-2); border: 1px solid var(--line); border-radius: 2px; padding: 6px 9px;
     font-size: .78rem; color: var(--bone); max-width: 240px; box-shadow: 0 6px 22px rgba(0,0,0,.5); }
   #tip b { color: var(--gold); }
 
-  /* Skeleton loaders */
   .skeleton { position: relative; overflow: hidden; background: var(--black-2); border-radius: 2px; }
   .skeleton::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%);
     background: linear-gradient(90deg, transparent, rgba(232,227,214,.06), transparent); animation: shimmer 1.3s infinite; }
   @keyframes shimmer { to { transform: translateX(100%); } }
   .sk-line { height: 11px; margin: 9px 0; }
 
-  /* Inline jargon term */
   .term { border-bottom: 1px dotted var(--gold-dim); cursor: help; }
 
-  /* Reset-view button */
   .view-reset { position: absolute; right: 12px; top: 12px; z-index: 5; font-family: var(--mono);
     font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--grey);
     background: rgba(10,10,11,.55); border: 1px solid var(--line); border-radius: 2px; padding: 5px 8px; cursor: pointer; }
   .view-reset:hover { color: var(--bone); border-color: var(--gold-dim); }
 
-  /* Pockets toggle + card */
   .pockrow { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: .85rem; }
   .pockrow input { accent-color: var(--gold); }
   .pock-list { display: flex; flex-direction: column; gap: 8px; }
@@ -273,7 +265,6 @@
   .pock-item .pmeta small { color: var(--grey); }
   .pock-item .pdrug { font-family: var(--mono); font-size: .74rem; color: var(--gold); }
 
-  /* Residue detail card */
   .res-card .empty { color: var(--grey-dim); font-size: .84rem; }
   .res-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
   .res-head .rlabel { font-family: var(--mono); font-size: 1.2rem; color: var(--bone); }
@@ -292,7 +283,6 @@
   .res-why b { color: var(--bone); font-weight: 500; }
   .res-actions { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
 
-  /* Modal (glossary) */
   .modal { position: fixed; inset: 0; z-index: 60; display: none; align-items: center; justify-content: center;
     background: rgba(0,0,0,.62); backdrop-filter: blur(3px); padding: 24px; }
   .modal.open { display: flex; }
@@ -304,7 +294,6 @@
   .gloss dt { font-family: var(--mono); font-size: .82rem; color: var(--gold); margin-top: 14px; letter-spacing: .04em; }
   .gloss dd { margin: 4px 0 0; font-size: .9rem; color: var(--grey); line-height: 1.55; }
 
-  /* Guided tour (coachmarks) */
   .tour-mask { position: fixed; inset: 0; z-index: 70; display: none; background: transparent; }
   .tour-mask.open { display: block; }
   .tour-spot { position: absolute; border: 2px solid var(--gold); border-radius: 4px;

@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
-# Trim + encode the record_demo.cjs recording into the README hero GIF (2.39:1, 1200x502).
+# Trim + encode the record_demo.cjs recording into docs/demo.gif. Needs ffmpeg + gifski.
 # Usage: scripts/make_demo_gif.sh [INPUT_WEBM] [OUTPUT_GIF]   (defaults: newest webm -> docs/demo.gif)
-# Requires ffmpeg + gifski on PATH.
 set -euo pipefail
 
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
