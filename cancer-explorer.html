@@ -591,6 +591,9 @@ const TISSUE_NAMES = {
 const tissueName = code => TISSUE_NAMES[code] || code.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 
 const $ = id => document.getElementById(id);
+// Escape untrusted strings (gene input, UniProt free text) before they enter innerHTML.
+const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 function setStatus(msg, kind="info") { const s = $("status"); s.className = "status " + kind; s.innerHTML = msg; }
 
 function showTip(e, html) { const t = $("tip"); t.innerHTML = html; t.style.opacity = "1"; moveTip(e); }
@@ -854,7 +857,7 @@ function renderStructure(pdb, highlights, mode) {
 function renderDetails(p) {
   $("details").innerHTML = `
     <div><b>Gene:</b> ${p.gene}</div>
-    <div><b>Protein:</b> ${p.name}</div>
+    <div><b>Protein:</b> ${esc(p.name)}</div>
     <div><b>Length:</b> ${p.length} amino acids</div>
     <div><b>UniProt:</b> <a href="https://www.uniprot.org/uniprotkb/${p.accession}" target="_blank">${p.accession}</a></div>
     <div><b>Structure:</b> <a href="https://alphafold.ebi.ac.uk/entry/${p.accession}" target="_blank">AlphaFold DB &#8599;</a></div>`;
@@ -870,7 +873,7 @@ function renderAbout(p) {
       <p class="matters"><b>Why mutations matter:</b> ${info.matters}</p>`;
   } else if (p.functionText) {
     $("about").innerHTML = `
-      <p>${p.functionText}</p>
+      <p>${esc(p.functionText)}</p>
       <p class="src">Function summary from UniProt. Mutations that change this protein can
       contribute to cancer — see where they land on the structure above.</p>`;
   } else {
@@ -1077,12 +1080,12 @@ function applyMutations(rerender = true) {
     }
     setStatus(`Showing <b>${currentProtein.gene}</b> with ${highlights.length} highlighted: ${highlights.map(h=>h.label).join(", ")}.${note}`, "ok");
   } else {
-    setStatus(`Showing <b>${currentProtein.gene}</b> — ${currentProtein.name}.`, "ok");
+    setStatus(`Showing <b>${currentProtein.gene}</b> — ${esc(currentProtein.name)}.`, "ok");
   }
 }
 
 async function load() {
-  const gene = $("gene").value.trim().toUpperCase();
+  const gene = $("gene").value.trim().toUpperCase().replace(/[^A-Z0-9-]/g, "");
   if (!gene) { setStatus("Type a gene symbol first.", "err"); return; }
   setStatus(`<span class="spinner"></span> Looking up ${gene} and downloading its structure…`, "info");
   $("proteinTitle").textContent = gene;
