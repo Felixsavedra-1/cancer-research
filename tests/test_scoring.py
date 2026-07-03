@@ -1,9 +1,6 @@
-"""Unit tests for the Target Priority composite score (pure, network-free)."""
-
 from cancer_tool import scoring
 
-# A short sequence where position 5 is R and position 8 is G (1-indexed).
-SEQUENCE = "MKTLR" "AAG" "AA"  # positions: 1 M,2 K,3 T,4 L,5 R,6 A,7 A,8 G,9 A,10 A
+SEQUENCE = "MKTLR" "AAG" "AA"
 
 
 def _hotspots():
@@ -24,7 +21,6 @@ def _pathogenicity():
 
 
 def _dynamics():
-    # Position 5 rigid (low flex), position 8 flexible; hinge near 8.
     return {
         "residue_numbers": [5, 8],
         "flexibility": [0.1, 0.9],
@@ -52,7 +48,6 @@ def test_uses_exact_variant_pathogenicity():
         _hotspots(), _pathogenicity(), _dynamics(), _pockets(), SEQUENCE
     )
     top = rows[0]
-    # R5H exact score (0.95) is used, not the position mean (0.5).
     assert top["pathogenicity"] == 0.95
     assert top["am_class"] == "LPath"
     assert top["wt"] == "R"
@@ -62,9 +57,8 @@ def test_score_formula_matches_weights():
     rows = scoring.score_residues(
         _hotspots(), _pathogenicity(), _dynamics(), _pockets(), SEQUENCE
     )
-    top = rows[0]  # position 5
+    top = rows[0]
     w = scoring.DEFAULT_WEIGHTS
-    # recurrence 1.0, pathogenicity 0.95, druggability 0.8, criticality=0.7*0.9=0.63
     expected = 100 * (
         w["recurrence"] * 1.0
         + w["pathogenicity"] * 0.95
@@ -83,9 +77,8 @@ def test_rationale_is_explained():
 
 
 def test_degrades_without_optional_signals():
-    # Only hotspots available — no AM, dynamics, or pockets.
     rows = scoring.score_residues(_hotspots(), None, None, None, SEQUENCE)
-    assert rows[0]["position"] == 5  # recurrence alone still ranks it first
+    assert rows[0]["position"] == 5
     assert rows[0]["pathogenicity"] == 0.0
     assert rows[0]["druggability"] == 0.0
     assert rows[0]["criticality"] == 0.0
@@ -96,8 +89,6 @@ def test_empty_hotspots_returns_empty():
 
 
 def test_low_confidence_suppresses_criticality():
-    # Position 5 is rigid (criticality 0.63 at full confidence) but in a disordered,
-    # low-pLDDT region — its structural criticality should fade to ~0.
     dynamics = {**_dynamics(), "plddt": [30.0, 95.0]}
     rows = scoring.score_residues(
         _hotspots(), _pathogenicity(), dynamics, _pockets(), SEQUENCE
@@ -107,8 +98,6 @@ def test_low_confidence_suppresses_criticality():
 
 
 def test_weights_perturbation_keeps_top_driver():
-    # A genuine driver should top the ranking regardless of how the four axes are
-    # balanced — ±25% on each axis independently must not dethrone it.
     top = scoring.score_residues(
         _hotspots(), _pathogenicity(), _dynamics(), _pockets(), SEQUENCE
     )[0]["position"]

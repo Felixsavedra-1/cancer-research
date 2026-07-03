@@ -1,6 +1,3 @@
-"""Pocket-detection tests: pure grid helpers + the LIGSITE scan on a hollow shell
-(no network, no fpocket binary)."""
-
 import math
 
 import numpy as np
@@ -29,13 +26,12 @@ def test_pocket_proximity_returns_best_lining_druggability():
         {"residues": [7, 8], "druggability": 0.3},
     ]
     assert pockets.pocket_proximity(6, found) == 0.8
-    assert pockets.pocket_proximity(7, found) == 0.8  # best of the two it lines
+    assert pockets.pocket_proximity(7, found) == 0.8
     assert pockets.pocket_proximity(99, found) == 0.0
     assert pockets.pocket_proximity(5, []) == 0.0
 
 
 def _hollow_sphere_pdb(n_points: int = 260, radius: float = 8.0) -> str:
-    """PDB text for a hollow shell of Cα atoms (Fibonacci sphere, empty centre)."""
     golden = math.pi * (3.0 - math.sqrt(5.0))
     lines = []
     for i in range(n_points):
@@ -58,4 +54,4 @@ def test_ligsite_finds_enclosed_cavity():
     assert top["source"] == "ligsite"
     assert top["volume"] > pockets.MIN_POCKET_VOLUME
     assert 0.0 < top["druggability"] <= 1.0
-    assert top["residues"]  # the shell atoms line the cavity
+    assert top["residues"]

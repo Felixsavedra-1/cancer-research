@@ -1,8 +1,5 @@
-"""Unit tests for the network-free mutation-parsing logic."""
-
 from cancer_tool import mutations as mut
 
-# Real human TP53 fragment for positions 170-180, padded so position 175 is arginine.
 TP53_FRAGMENT_170 = "TEVVRRCPHHE"
 
 

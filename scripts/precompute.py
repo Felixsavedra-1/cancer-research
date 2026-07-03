@@ -1,13 +1,4 @@
 #!/usr/bin/env python3
-"""Precompute the full engine for featured genes → ``data/{GENE}.json`` for the
-browser-only ``cancer-explorer.html`` (which can't run the Python science live).
-
-Usage::
-
-    python scripts/precompute.py                 # all featured genes
-    python scripts/precompute.py TP53 KRAS BRAF   # specific genes
-"""
-
 from __future__ import annotations
 
 import json
@@ -94,7 +85,6 @@ def build_gene(gene: str, session: requests.Session) -> dict | None:
 
 
 def validate_payload(payload: dict) -> None:
-    """Fail loudly on a malformed gene payload before it's written or trusted."""
     for key in ("gene", "accession", "name", "length", "provenance", "priority"):
         if key not in payload:
             raise ValueError(f"{payload.get('gene', '?')}: missing '{key}'")

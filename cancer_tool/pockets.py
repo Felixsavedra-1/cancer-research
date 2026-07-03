@@ -1,10 +1,3 @@
-"""Druggable-pocket detection via a LIGSITE-style geometric scan (Hendlich et al. 1997).
-
-Grid the protein, flag solvent voxels enclosed between protein along several scan lines,
-cluster them into pockets, rank by enclosed volume. Uses the `fpocket` binary when present,
-else the always-available pure-Python scan. No GPU, no docking.
-"""
-
 from __future__ import annotations
 
 import io
@@ -12,29 +5,21 @@ import shutil
 
 import numpy as np
 
-try:  # pragma: no cover - import-time configuration
+try:
     import prody
 
     prody.confProDy(verbosity="none")
     from prody import parsePDBStream
-except Exception:  # pragma: no cover
+except Exception:
     prody = None
 
-# Grid scan parameters. Spacing trades resolution for speed; 1.0 Å is plenty for
-# laptop-scale proteins. A voxel counts as "protein" within this radius of a heavy
-# atom (~heavy-atom vdW + small probe).
 GRID_SPACING = 1.0
 PROTEIN_RADIUS = 3.0
-# Min protein-solvent-protein scan lines (of 7) for a voxel to be "buried".
 MIN_PSP = 5
-# Smallest pocket worth reporting, in Å³.
 MIN_POCKET_VOLUME = 80.0
-# Volume (Å³) at which a pocket is considered fully druggable; smaller scales down.
 DRUGGABLE_VOLUME_REF = 350.0
-# A residue lines a pocket if a heavy atom sits within this of a pocket voxel.
 LINING_DISTANCE = 4.5
 
-# Seven scan-line directions (3 axes + 4 cube diagonals).
 _DIRECTIONS = [
     (1, 0, 0),
     (0, 1, 0),
@@ -47,7 +32,6 @@ _DIRECTIONS = [
 
 
 def _shift(arr: np.ndarray, d: tuple[int, int, int]) -> np.ndarray:
-    """Shift a 3D boolean array by one voxel along ``d`` with zero (False) fill."""
     out = np.zeros_like(arr)
     src = [slice(None)] * 3
     dst = [slice(None)] * 3
@@ -61,7 +45,6 @@ def _shift(arr: np.ndarray, d: tuple[int, int, int]) -> np.ndarray:
 
 
 def _ray_presence(protein: np.ndarray, d: tuple[int, int, int], steps: int) -> np.ndarray:
-    """For each voxel, is there a protein voxel somewhere along direction ``d``?"""
     acc = np.zeros_like(protein)
     shifted = protein
     for _ in range(steps):
@@ -71,21 +54,11 @@ def _ray_presence(protein: np.ndarray, d: tuple[int, int, int], steps: int) -> n
 
 
 def detect_pockets(pdb_text: str) -> list[dict]:
-    """Find candidate druggable pockets in a structure.
-
-    Returns a list (most druggable first) of::
-
-        {"residues": [int, ...],   # residue numbers lining the pocket
-         "druggability": 0.0-1.0,  # from enclosed volume
-         "volume": float,          # Å³
-         "center": [x, y, z],
-         "source": "fpocket" | "ligsite"}
-    """
     if shutil.which("fpocket"):
         try:
             return _detect_with_fpocket(pdb_text)
         except Exception:
-            pass  # fall through to the always-available geometric scan
+            pass
     return _detect_ligsite(pdb_text)
 
 
@@ -107,13 +80,11 @@ def _detect_ligsite(pdb_text: str) -> list[dict]:
     coords = np.asarray(heavy.getCoords(), dtype=float)
     resnums = np.asarray(heavy.getResnums())
 
-    # Grid spanning the protein plus a margin so surface pockets aren't clipped.
     margin = PROTEIN_RADIUS + GRID_SPACING
     lo = coords.min(axis=0) - margin
     hi = coords.max(axis=0) + margin
     dims = np.ceil((hi - lo) / GRID_SPACING).astype(int) + 1
 
-    # Classify every voxel as protein (near an atom) or solvent, via KD-tree.
     axes = [lo[i] + np.arange(dims[i]) * GRID_SPACING for i in range(3)]
     gx, gy, gz = np.meshgrid(*axes, indexing="ij")
     grid_pts = np.column_stack([gx.ravel(), gy.ravel(), gz.ravel()])
@@ -122,7 +93,6 @@ def _detect_ligsite(pdb_text: str) -> list[dict]:
     protein = (np.asarray(near) > 0).reshape(dims)
     solvent = ~protein
 
-    # Count protein-solvent-protein scan lines through each solvent voxel.
     steps = int(max(dims))
     psp = np.zeros(dims, dtype=np.int8)
     for d in _DIRECTIONS:
@@ -134,7 +104,6 @@ def _detect_ligsite(pdb_text: str) -> list[dict]:
     if not pocket_voxels.any():
         return []
 
-    # Cluster contiguous buried voxels into discrete pockets.
     labels, n = ndimage.label(pocket_voxels)
     voxel_volume = GRID_SPACING**3
     pockets: list[dict] = []
@@ -148,7 +117,6 @@ def _detect_ligsite(pdb_text: str) -> list[dict]:
         pts = lo + idx * GRID_SPACING
         center = pts.mean(axis=0)
 
-        # Residues with a heavy atom lining the pocket cavity.
         lining_idx = tree.query_ball_point(pts, r=LINING_DISTANCE)
         lining_atoms = {a for sub in lining_idx for a in sub}
         residues = sorted({int(resnums[a]) for a in lining_atoms})
@@ -168,8 +136,7 @@ def _detect_ligsite(pdb_text: str) -> list[dict]:
     return pockets
 
 
-def _detect_with_fpocket(pdb_text: str) -> list[dict]:  # pragma: no cover - needs binary
-    """Run fpocket on the structure and parse its ranked pockets."""
+def _detect_with_fpocket(pdb_text: str) -> list[dict]:
     import os
     import re
     import subprocess
@@ -210,7 +177,6 @@ def _detect_with_fpocket(pdb_text: str) -> list[dict]:  # pragma: no cover - nee
 
 
 def pocket_proximity(position: int, pockets: list[dict]) -> float:
-    """Druggability of the best pocket this residue lines, else 0.0."""
     best = 0.0
     for pocket in pockets:
         if position in pocket["residues"]:

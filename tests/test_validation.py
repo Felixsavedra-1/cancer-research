@@ -1,9 +1,3 @@
-"""The rankings must rediscover known cancer biology. These guard the committed
-``data/*.json`` against scoring/parsing regressions — network-free, run in CI.
-
-If a change breaks these, the science is wrong, not the test.
-"""
-
 import json
 from pathlib import Path
 
@@ -13,15 +7,12 @@ from scripts.precompute import validate_payload
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
-# Textbook drivers each gene's ranking should surface near the top.
 KNOWN_DRIVERS = {
     "TP53": ({"R273", "R248", "R175"}, 5),
     "KRAS": ({"G12"}, 1),
     "BRAF": ({"V600"}, 1),
     "EGFR": ({"L858", "T790"}, 5),
     "IDH2": ({"R172", "R140"}, 2),
-    # KIT has several co-equal activating drivers; D816 sits in a low-pLDDT region so its
-    # structural-criticality bonus is (correctly) down-weighted, but it stays a top driver.
     "KIT": ({"D816"}, 3),
 }
 

@@ -1,14 +1,9 @@
-"""Interactive 3D molecular views with py3Dmol, coloured by pLDDT confidence,
-ENM/NMA flexibility, or the Target Priority Score.
-"""
-
 from __future__ import annotations
 
 _HIGHLIGHT_COLORS = ["magenta", "orange", "lime", "cyan", "yellow", "red"]
 
-# Gradient colour stops (RGB), interpolated across a 0–1 value.
-_FLEX_STOPS = [(60, 90, 230), (230, 230, 230), (220, 60, 60)]  # rigid → mobile
-_PRIORITY_STOPS = [  # low → high, ending on the Vedra gold/crimson
+_FLEX_STOPS = [(60, 90, 230), (230, 230, 230), (220, 60, 60)]
+_PRIORITY_STOPS = [
     (40, 40, 46),
     (110, 92, 52),
     (198, 161, 91),
@@ -17,7 +12,6 @@ _PRIORITY_STOPS = [  # low → high, ending on the Vedra gold/crimson
 
 
 def _lerp_color(value: float, stops: list[tuple[int, int, int]]) -> str:
-    """Interpolate a 0–1 ``value`` across ``stops`` and return a ``0x`` hex colour."""
     value = max(0.0, min(1.0, value))
     if len(stops) == 1:
         r, g, b = stops[0]
@@ -32,7 +26,6 @@ def _lerp_color(value: float, stops: list[tuple[int, int, int]]) -> str:
 
 
 def _color_by_values(view, values: dict[int, float], stops, bins: int = 12) -> None:
-    """Colour the cartoon per residue by binning ``{resi: value}`` for few draw calls."""
     buckets: dict[int, list[int]] = {}
     for resi, value in values.items():
         idx = min(bins - 1, max(0, int(value * bins)))
@@ -54,17 +47,6 @@ def render_structure(
     width: int = 900,
     height: int = 600,
 ) -> str:
-    """Return embeddable HTML for a 3D view of ``pdb_text``.
-
-    ``color_mode`` selects the cartoon colouring:
-
-    - ``"plddt"`` colours by the B-factor column (AlphaFold pLDDT): red low → blue high.
-    - ``"flexibility"`` colours by ``{resi: 0-1}`` ENM mobility (blue rigid → red mobile).
-    - ``"priority"`` colours by ``{resi: 0-1}`` normalised Target Priority Score.
-
-    ``highlights`` (``{position, label, color?}``) are drawn as labelled sticks +
-    spheres. ``pocket_residues`` adds a translucent gold surface over a druggable pocket.
-    """
     import py3Dmol
 
     view = py3Dmol.view(width=width, height=height)

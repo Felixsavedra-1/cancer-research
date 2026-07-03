@@ -1,5 +1,3 @@
-"""Cancer Protein Explorer — Streamlit app. Run with: streamlit run app.py"""
-
 from __future__ import annotations
 
 import pandas as pd
@@ -36,7 +34,6 @@ _BRAND_CSS = """
   --mono: 'IBM Plex Mono', ui-monospace, monospace;
 }
 
-/* Background grid overlay */
 .stApp::before {
   content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
   background-image:
@@ -104,7 +101,6 @@ a, a:visited { color: var(--gold); }
 
 
 def inject_brand_css() -> None:
-    """Apply the Vedra Research brand fonts and component styling over the dark theme."""
     st.markdown(_BRAND_CSS, unsafe_allow_html=True)
     st.markdown(
         '<div class="vr-masthead">'
@@ -155,7 +151,7 @@ def load_dynamics(pdb_text: str):
 def load_pockets(pdb_text: str):
     try:
         return pockets.detect_pockets(pdb_text)
-    except Exception:
+    except RuntimeError:
         return []
 
 
@@ -249,7 +245,6 @@ for mutation in parsed:
     else:
         invalid.append(f"{mutation['label']}: {message}")
 
-# --- Run the analysis engine (each piece cached, each fails soft) -------------
 with st.spinner("Analysing structure, dynamics and variant effects…"):
     try:
         hotspots = load_hotspots(gene)
@@ -350,7 +345,6 @@ with info_col:
             st.markdown(f"**Top disease links:** {diseases}")
         st.caption("Target context from [Open Targets](https://platform.opentargets.org).")
 
-# --- Target Priority panel (the discovery deliverable) -----------------------
 st.divider()
 st.subheader("🎯 Target Priority — ranked druggable cancer-driver residues")
 if priority_rows:

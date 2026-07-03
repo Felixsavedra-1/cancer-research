@@ -1,8 +1,5 @@
-"""Unit tests for AlphaMissense CSV parsing (network-free)."""
-
 from cancer_tool import pathogenicity as patho
 
-# Minimal AlphaMissense-style CSV: two substitutions at residue 1, one at residue 175.
 SAMPLE_CSV = """protein_variant,am_pathogenicity,am_class
 M1A,0.80,LPath
 M1C,0.60,LPath
@@ -32,7 +29,6 @@ def test_parse_aggregates_by_position():
 
 def test_parse_skips_malformed_rows():
     parsed = patho.parse_alphamissense_csv(SAMPLE_CSV)
-    # "junkrow" and "G2,bad,Amb" (non-numeric score) must not appear.
     assert "junk" not in str(parsed["by_variant"])
     assert 2 not in parsed["by_position"]
 

@@ -60,7 +60,6 @@
     position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
     width: 120px; height: 52px; pointer-events: none; opacity: .95; z-index: 1;
   }
-  /* avoid overlapping brand/actions on narrow screens (where actions also wrap) */
   @media (max-width: 760px) { .helix-emblem { display: none; } }
   .brand { display: flex; align-items: baseline; gap: 10px; }
   .brand-name {
@@ -77,14 +76,6 @@
     padding: 6px 10px; cursor: pointer; transition: color .2s ease, border-color .2s ease;
   }
   .hbtn:hover { color: var(--gold); border-color: var(--gold-dim); }
-  .modeswitch { display: flex; border: 1px solid var(--line); border-radius: 2px; overflow: hidden; }
-  .ms-opt {
-    font-family: var(--mono); font-size: .72rem; letter-spacing: .1em; text-transform: uppercase;
-    color: var(--grey); background: transparent; border: none; padding: 6px 11px; cursor: pointer;
-    transition: background .2s ease, color .2s ease;
-  }
-  .ms-opt + .ms-opt { border-left: 1px solid var(--line); }
-  .ms-opt.active { background: var(--gold); color: var(--black); }
 
   .subbar {
     padding: 8px 24px; font-size: .8rem; color: var(--grey-dim);
@@ -92,12 +83,6 @@
   }
   .subbar b { color: #c98f8f; font-weight: 500; }
 
-  body.mode-beginner .expert-only { display: none !important; }
-  body.mode-expert .beginner-only { display: none !important; }
-  .modehint { font-size: .86rem; line-height: 1.55; color: var(--grey); margin-bottom: 12px;
-    padding: 10px 13px; border: 1px solid var(--line); border-left: 2px solid var(--gold-dim);
-    border-radius: 2px; background: rgba(198,161,91,.04); }
-  .modehint b { color: var(--bone); }
   .legend-plain { color: var(--grey-dim); font-style: italic; }
 
   .layout { display: grid; grid-template-columns: 320px 1fr; gap: 0; align-items: start; }
@@ -293,27 +278,6 @@
   .modal-box .x:hover { color: var(--bone); }
   .gloss dt { font-family: var(--mono); font-size: .82rem; color: var(--gold); margin-top: 14px; letter-spacing: .04em; }
   .gloss dd { margin: 4px 0 0; font-size: .9rem; color: var(--grey); line-height: 1.55; }
-
-  .tour-mask { position: fixed; inset: 0; z-index: 70; display: none; background: transparent; }
-  .tour-mask.open { display: block; }
-  .tour-spot { position: absolute; border: 2px solid var(--gold); border-radius: 4px;
-    box-shadow: 0 0 0 4000px rgba(5,5,6,.6); transition: all .25s ease; pointer-events: none; }
-  .tour-pop { position: absolute; z-index: 71; max-width: 320px; background: var(--panel);
-    border: 1px solid var(--gold-dim); border-radius: 3px; padding: 16px 18px; box-shadow: 0 14px 44px rgba(0,0,0,.6); }
-  .tour-pop h4 { margin: 0 0 7px; font-family: var(--display); font-weight: 400; font-size: 1.1rem; color: var(--bone); }
-  .tour-pop p { margin: 0; font-size: .88rem; color: var(--grey); line-height: 1.55; }
-  .tour-nav { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 14px; }
-  .tour-nav .steps { font-family: var(--mono); font-size: .72rem; color: var(--grey-dim); }
-  .tour-nav .btns { display: flex; gap: 8px; }
-  .tour-btn { font-family: var(--mono); font-size: .72rem; letter-spacing: .08em; text-transform: uppercase;
-    border-radius: 2px; padding: 6px 11px; cursor: pointer; border: 1px solid var(--line);
-    background: transparent; color: var(--grey); transition: color .2s ease, border-color .2s ease; }
-  .tour-btn:hover { color: var(--bone); border-color: var(--gold-dim); }
-  .tour-btn.primary { background: var(--gold); border-color: var(--gold); color: var(--black); }
-  .tour-btn.primary:hover { background: var(--bone); border-color: var(--bone); }
-  .tour-skip { font-family: var(--mono); font-size: .7rem; color: var(--grey-dim); background: none; border: none;
-    cursor: pointer; text-decoration: underline; }
-  .tour-skip:hover { color: var(--grey); }
 </style>
 </head>
 <body>
@@ -324,12 +288,7 @@
     </div>
     <canvas id="helixEmblem" class="helix-emblem" width="240" height="104" aria-hidden="true"></canvas>
     <div class="topbar-actions">
-      <button class="hbtn" id="tourBtn" title="Replay the guided walkthrough">Take the tour</button>
       <button class="hbtn" id="glossaryBtn" title="Plain-English definitions of the terms used here">Glossary</button>
-      <div class="modeswitch" id="modeSwitch" role="group" aria-label="Detail level">
-        <button class="ms-opt" data-mode="beginner" title="Plain-English view">Beginner</button>
-        <button class="ms-opt" data-mode="expert" title="Full numeric detail">Expert</button>
-      </div>
     </div>
   </div>
 </div>
@@ -397,15 +356,6 @@
       <div class="card viewer-card">
         <h3 id="proteinTitle">Protein viewer</h3>
         <div id="status" class="status info" style="margin-bottom:12px">Loading a real predicted protein structure…</div>
-        <div class="modehint beginner-only">
-          <b>New here?</b> Drag the 3D model to spin it. Coloured ticks below are real cancer
-          mutation hotspots — click any one (or a ranked target) to get a plain-English explanation.
-          Want the numbers? Flip to <b>Expert</b>, top-right.
-        </div>
-        <div class="modehint expert-only">
-          <b>Expert view.</b> Showing full numeric scores, the four priority axes, AlphaMissense
-          classes and ENM/NMA dynamics. Switch to <b>Beginner</b> for plain-English framing.
-        </div>
         <div class="viewer-wrap">
           <div class="zoom-ctl">
             <span class="zoom-sign">+</span>
@@ -431,8 +381,8 @@
           <span><span class="swatch" style="background:#f2d641"></span>medium</span>
           <span><span class="swatch" style="background:#2db84d"></span>good</span>
           <span><span class="swatch" style="background:#3a6ee6"></span>high</span>
-          <span class="beginner-only legend-plain">how sure the AI is about each part's shape</span>
-          <span class="expert-only term" title="pLDDT — AlphaFold's per-residue confidence score (0–100) for how sure it is about that part's predicted shape.">(pLDDT)</span>
+          <span class="legend-plain">how sure the AI is about each part's shape</span>
+          <span class="term" title="pLDDT — AlphaFold's per-residue confidence score (0–100) for how sure it is about that part's predicted shape.">(pLDDT)</span>
         </div>
         <details style="margin-top:12px">
           <summary>How to read this</summary>
@@ -498,28 +448,10 @@
 
 <div id="tip"></div>
 
-<!-- Glossary modal -->
 <div class="modal" id="glossaryModal">
   <div class="modal-box">
     <h3>Glossary <span class="x" id="glossaryX" title="Close">&#10005;</span></h3>
     <dl class="gloss" id="glossList"></dl>
-  </div>
-</div>
-
-<!-- Guided tour -->
-<div class="tour-mask" id="tourMask">
-  <div class="tour-spot" id="tourSpot"></div>
-  <div class="tour-pop" id="tourPop">
-    <h4 id="tourTitle"></h4>
-    <p id="tourBody"></p>
-    <div class="tour-nav">
-      <button class="tour-skip" id="tourSkip">Skip</button>
-      <span class="steps" id="tourSteps"></span>
-      <span class="btns">
-        <button class="tour-btn" id="tourBack">Back</button>
-        <button class="tour-btn primary" id="tourNext">Next</button>
-      </span>
-    </div>
   </div>
 </div>
 
@@ -532,19 +464,17 @@ let hotspotCache = null;
 let currentProtein = null;
 let currentHotspots = [];
 let lastHighlights = [];
-let currentEngine = null;  // precomputed dynamics + priority for featured genes
-let currentAM = null;      // live per-residue mean AlphaMissense pathogenicity {pos: 0..1}
-let amUrl = null;          // amAnnotationsUrl from the AlphaFold prediction API
-let showPockets = false;   // pockets overlay on the 3D structure
-let spotlightPos = null;   // residue currently shown in the Residue spotlight card
+let currentEngine = null;
+let currentAM = null;
+let amUrl = null;
+let showPockets = false;
+let spotlightPos = null;
 
-// Gradient colour stops, mirroring cancer_tool/viewer.py.
-const FLEX_STOPS = [[60,90,230],[230,230,230],[220,60,60]];      // rigid → mobile
-const PRIORITY_STOPS = [[40,40,46],[110,92,52],[198,161,91],[178,58,58]]; // low → high
-const PATH_STOPS = [[70,150,95],[225,200,90],[200,60,60]];       // benign → pathogenic
-const POCKET_COLORS = ["0x6fb1ff","0xb98cff","0x5fd0c0","0xe69a5f"]; // distinct hues per pocket
+const FLEX_STOPS = [[60,90,230],[230,230,230],[220,60,60]];
+const PRIORITY_STOPS = [[40,40,46],[110,92,52],[198,161,91],[178,58,58]];
+const PATH_STOPS = [[70,150,95],[225,200,90],[200,60,60]];
+const POCKET_COLORS = ["0x6fb1ff","0xb98cff","0x5fd0c0","0xe69a5f"];
 
-// Plain-English definitions, reused by the About card and the Glossary modal.
 const ROLE_DEF = {
   "Oncogene": "Oncogene — a gene that, when mutated or overactive, drives cells to grow and divide uncontrollably.",
   "Tumor suppressor": "Tumor suppressor — a gene that normally restrains cell growth or repairs damage; losing it removes a brake on cancer.",
@@ -591,7 +521,6 @@ const TISSUE_NAMES = {
 const tissueName = code => TISSUE_NAMES[code] || code.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 
 const $ = id => document.getElementById(id);
-// Escape untrusted strings (gene input, UniProt free text) before they enter innerHTML.
 const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c =>
   ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 function setStatus(msg, kind="info") { const s = $("status"); s.className = "status " + kind; s.innerHTML = msg; }
@@ -657,7 +586,6 @@ function renderPositionTrack() {
   if (clearBtn) clearBtn.hidden = lastHighlights.length === 0;
 }
 
-// 3Dmol's zoom() is multiplicative, so track the absolute level and apply the ratio.
 function setZoom(v) {
   if (!viewer) return;
   viewer.zoom(v / currentZoom);
@@ -667,7 +595,6 @@ function setZoom(v) {
 
 const AA3 = {ALA:"A",ARG:"R",ASN:"N",ASP:"D",CYS:"C",GLN:"Q",GLU:"E",GLY:"G",HIS:"H",
   ILE:"I",LEU:"L",LYS:"K",MET:"M",PHE:"F",PRO:"P",SER:"S",THR:"T",TRP:"W",TYR:"Y",VAL:"V",TER:"*"};
-// Accept three-letter codes (ARG175HIS) by collapsing them to one-letter (R175H).
 const to1 = aa => AA3[aa.toUpperCase()] || aa;
 
 function parseMutations(text) {
@@ -690,13 +617,17 @@ function validate(mut, seq) {
   return { ok:true };
 }
 
+async function fetchJson(url, errorMessage) {
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(errorMessage || `Request failed (${r.status})`);
+  return await r.json();
+}
+
 async function fetchProtein(gene) {
   const q = `gene_exact:${gene} AND organism_id:9606 AND reviewed:true`;
   const url = `https://rest.uniprot.org/uniprotkb/search?query=${encodeURIComponent(q)}`
             + `&fields=accession,protein_name,sequence,cc_function&format=json&size=1`;
-  const r = await fetch(url);
-  if (!r.ok) throw new Error("UniProt lookup failed");
-  const results = (await r.json()).results || [];
+  const results = (await fetchJson(url, "UniProt lookup failed")).results || [];
   if (!results.length) return null;
   const rec = results[0];
   const name = rec.proteinDescription?.recommendedName?.fullName?.value || rec.primaryAccession;
@@ -710,18 +641,18 @@ async function fetchProtein(gene) {
 }
 
 async function fetchStructure(accession) {
-  const meta = await fetch(`https://alphafold.ebi.ac.uk/api/prediction/${accession}`);
-  if (!meta.ok) throw new Error("No AlphaFold structure available for " + accession);
-  const payload = await meta.json();
+  const notFound = "No AlphaFold structure available for " + accession;
+  // The model file version bumps over time (v4 -> v6 -> ...); always resolve it via
+  // the API's pdbUrl instead of hardcoding a versioned file URL.
+  const payload = await fetchJson(`https://alphafold.ebi.ac.uk/api/prediction/${accession}`, notFound);
   const pdbUrl = payload?.[0]?.pdbUrl;
-  amUrl = payload?.[0]?.amAnnotationsUrl || null;  // AlphaMissense CSV, fetched lazily
-  if (!pdbUrl) throw new Error("No AlphaFold structure available for " + accession);
+  amUrl = payload?.[0]?.amAnnotationsUrl || null;
+  if (!pdbUrl) throw new Error(notFound);
   const r = await fetch(pdbUrl);
   if (!r.ok) throw new Error("Could not download structure for " + accession);
   return await r.text();
 }
 
-// Live AlphaMissense: average the per-variant pathogenicity at each residue → {pos: 0..1}.
 async function fetchAlphaMissense(url) {
   if (!url) return null;
   try {
@@ -732,8 +663,8 @@ async function fetchAlphaMissense(url) {
     for (const line of text.split("\n")) {
       const c = line.split(",");
       if (c.length < 2) continue;
-      const m = c[0].match(/^[A-Za-z](\d+)[A-Za-z]$/);  // protein_variant e.g. R175H; skips header
-      const v = parseFloat(c[1]);                        // am_pathogenicity 0..1
+      const m = c[0].match(/^[A-Za-z](\d+)[A-Za-z]$/);
+      const v = parseFloat(c[1]);
       if (!m || isNaN(v)) continue;
       const p = +m[1];
       sums[p] = (sums[p] || 0) + v; counts[p] = (counts[p] || 0) + 1;
@@ -746,8 +677,11 @@ async function fetchAlphaMissense(url) {
 
 async function fetchHotspots(gene) {
   if (!hotspotCache) {
-    const r = await fetch("https://www.cancerhotspots.org/api/hotspots/single");
-    hotspotCache = r.ok ? await r.json() : [];
+    try {
+      hotspotCache = await fetchJson("https://www.cancerhotspots.org/api/hotspots/single");
+    } catch (e) {
+      hotspotCache = [];
+    }
   }
   const g = gene.toUpperCase();
   const out = [];
@@ -767,7 +701,6 @@ async function fetchHotspots(gene) {
 }
 
 function colorResiduesByValue(values, stops) {
-  // values: {resi: 0-1}. Bin to limit draw calls, like the Python viewer.
   const bins = {};
   for (const [resi, v] of Object.entries(values)) {
     const idx = Math.min(11, Math.max(0, Math.floor(v * 12)));
@@ -829,28 +762,28 @@ function renderStructure(pdb, highlights, mode) {
     $("legend").innerHTML = `<span><span class="swatch" style="background:#3c5ae6"></span>rigid core</span>
       <span><span class="swatch" style="background:#e6e6e6"></span>intermediate</span>
       <span><span class="swatch" style="background:#dc3c3c"></span>mobile</span>
-      <span class="beginner-only legend-plain">how much each part naturally flexes</span>
-      <span class="expert-only term" title="Elastic Network Model normal-mode analysis — intrinsic motion inferred from one structure, no simulation.">(ENM/NMA flexibility)</span>${tail}`;
+      <span class="legend-plain">how much each part naturally flexes</span>
+      <span class="term" title="Elastic Network Model normal-mode analysis — intrinsic motion inferred from one structure, no simulation.">(ENM/NMA flexibility)</span>${tail}`;
   } else if (mode === "priority") {
     $("legend").innerHTML = `<span><span class="swatch" style="background:#2a2a2e"></span>low</span>
       <span><span class="swatch" style="background:#6e5c34"></span>·</span>
       <span><span class="swatch" style="background:#c6a15b"></span>gold</span>
       <span><span class="swatch" style="background:#b23a3a"></span>highest priority</span>
-      <span class="beginner-only legend-plain">redder = more worth targeting</span>
-      <span class="expert-only term" title="Target Priority Score — a 0–1 fusion of recurrence, pathogenicity, druggability and structural criticality.">(Target Priority Score)</span>${tail}`;
+      <span class="legend-plain">redder = more worth targeting</span>
+      <span class="term" title="Target Priority Score — a 0–1 fusion of recurrence, pathogenicity, druggability and structural criticality.">(Target Priority Score)</span>${tail}`;
   } else if (mode === "path") {
     $("legend").innerHTML = `<span><span class="swatch" style="background:#469660"></span>likely benign</span>
       <span><span class="swatch" style="background:#e1c85a"></span>uncertain</span>
       <span><span class="swatch" style="background:#c83c3c"></span>likely pathogenic</span>
-      <span class="beginner-only legend-plain">redder = a mutation here is more likely harmful</span>
-      <span class="expert-only term" title="AlphaMissense — DeepMind's AI prediction of how damaging each possible amino-acid change is, averaged here per residue.">(AlphaMissense)</span>${tail}`;
+      <span class="legend-plain">redder = a mutation here is more likely harmful</span>
+      <span class="term" title="AlphaMissense — DeepMind's AI prediction of how damaging each possible amino-acid change is, averaged here per residue.">(AlphaMissense)</span>${tail}`;
   } else {
     $("legend").innerHTML = `<span><span class="swatch" style="background:#e63a3a"></span>low confidence</span>
       <span><span class="swatch" style="background:#f2d641"></span>medium</span>
       <span><span class="swatch" style="background:#2db84d"></span>good</span>
       <span><span class="swatch" style="background:#3a6ee6"></span>high</span>
-      <span class="beginner-only legend-plain">how sure the AI is about each part's shape</span>
-      <span class="expert-only term" title="pLDDT — AlphaFold's per-residue confidence score (0–100) for how sure it is about that part's predicted shape.">(pLDDT)</span>${tail}`;
+      <span class="legend-plain">how sure the AI is about each part's shape</span>
+      <span class="term" title="pLDDT — AlphaFold's per-residue confidence score (0–100) for how sure it is about that part's predicted shape.">(pLDDT)</span>${tail}`;
   }
 }
 
@@ -917,6 +850,7 @@ function renderHotspots(list) {
   box.querySelectorAll("tr.hot").forEach(tr => tr.onclick = () => selectResidue(+tr.getAttribute("data-pos")));
 }
 
+// Weights mirror cancer_tool/scoring.py DEFAULT_WEIGHTS — update both.
 function renderPriority(eng) {
   const box = $("priority");
   if (!eng || !eng.priority || !eng.priority.length) {
@@ -930,20 +864,20 @@ function renderPriority(eng) {
     return `<tr class="hot" data-pos="${r.position}" title="Click for details on ${r.residue}">
       <td><b>${r.residue}</b></td>
       <td><div class="scorecell"><div class="track"><div class="fill" style="width:${100*r.score/max}%;background:${col}"></div></div><span class="num">${Math.round(r.score)}</span></div></td>
-      <td class="expert-only"><div class="axes">${pip(r.recurrence,"Recurrence")}${pip(r.pathogenicity,"Pathogenicity")}${pip(r.druggability,"Druggability")}${pip(r.criticality,"Criticality")}</div></td>
+      <td><div class="axes">${pip(r.recurrence,"Recurrence")}${pip(r.pathogenicity,"Pathogenicity")}${pip(r.druggability,"Druggability")}${pip(r.criticality,"Criticality")}</div></td>
       <td class="why" title="${r.rationale}">${r.rationale}</td>
     </tr>`;
   }).join("");
   let summary = "";
-  if (eng.dynamics) summary += `<div class="dyn-line expert-only"><b>Folding dynamics:</b> ENM/NMA over ${eng.dynamics.n_modes} modes · hinge/pivot residues ${eng.dynamics.hinges.slice(0,6).join(", ") || "—"}.</div>`;
-  if (eng.pockets && eng.pockets.length) { const p = eng.pockets[0]; summary += `<div class="dyn-line expert-only"><b>Druggability:</b> ${eng.pockets.length} pocket(s) detected; top ${p.volume} Å³, druggability ${(+p.druggability).toFixed(2)}.</div>`; }
+  if (eng.dynamics) summary += `<div class="dyn-line"><b>Folding dynamics:</b> ENM/NMA over ${eng.dynamics.n_modes} modes · hinge/pivot residues ${eng.dynamics.hinges.slice(0,6).join(", ") || "—"}.</div>`;
+  if (eng.pockets && eng.pockets.length) { const p = eng.pockets[0]; summary += `<div class="dyn-line"><b>Druggability:</b> ${eng.pockets.length} pocket(s) detected; top ${p.volume} Å³, druggability ${(+p.druggability).toFixed(2)}.</div>`; }
   if (eng.targets && eng.targets.tractability && eng.targets.tractability.length) {
     const mods = [...new Set(eng.targets.tractability.map(t => t.modality))];
     const dis = eng.targets.top_diseases && eng.targets.top_diseases.length ? ` · top link: ${eng.targets.top_diseases[0].name}` : "";
-    summary += `<div class="dyn-line expert-only"><b>Open Targets:</b> tractable via ${mods.join(", ")}${dis}.</div>`;
+    summary += `<div class="dyn-line"><b>Open Targets:</b> tractable via ${mods.join(", ")}${dis}.</div>`;
   }
-  box.innerHTML = `<table><thead><tr><th>Residue</th><th>Priority</th><th class="expert-only">Recur · Path · Drug · Crit</th><th>Why it ranks here</th></tr></thead><tbody>${rows}</tbody></table>
-    <div class="muted" style="margin-top:8px"><span class="expert-only">Priority = 0.30·recurrence + 0.35·pathogenicity + 0.20·druggability + 0.15·structural criticality. Pathogenicity from DeepMind <b>AlphaMissense</b>; criticality from <b>ENM/NMA</b> dynamics. </span><b>Click a row</b> to spotlight that residue in 3D and read why it ranks here.</div>${summary}`;
+  box.innerHTML = `<table><thead><tr><th>Residue</th><th>Priority</th><th>Recur · Path · Drug · Crit</th><th>Why it ranks here</th></tr></thead><tbody>${rows}</tbody></table>
+    <div class="muted" style="margin-top:8px"><span>Priority = 0.30·recurrence + 0.35·pathogenicity + 0.20·druggability + 0.15·structural criticality. Pathogenicity from DeepMind <b>AlphaMissense</b>; criticality from <b>ENM/NMA</b> dynamics. </span><b>Click a row</b> to spotlight that residue in 3D and read why it ranks here.</div>${summary}`;
   box.querySelectorAll("tr.hot").forEach(tr => tr.onclick = () => selectResidue(+tr.getAttribute("data-pos")));
 }
 
@@ -976,7 +910,6 @@ function focusPocket(i) {
   setStatus(`Focused on <b>pocket ${i + 1}</b> — ${pk.residues.length} residues, ${Math.round(pk.volume)} Å³, druggability ${(+pk.druggability).toFixed(2)}.`, "info");
 }
 
-// Click any residue (priority row, hotspot, track tick) → spotlight card + camera fly-in.
 function selectResidue(pos) {
   if (!currentProtein || !lastPdb) return;
   const eng = currentEngine;
@@ -1031,7 +964,6 @@ function selectResidue(pos) {
   const addBtn = $("resDetail").querySelector("[data-add]");
   if (addBtn) addBtn.onclick = () => addMutation(addBtn.getAttribute("data-add"));
 
-  // Spotlight in 3D and fly the camera in.
   spotlightPos = pos;
   renderStructure(lastPdb, lastHighlights, $("colormode").value);
   if (viewer) {
@@ -1059,7 +991,6 @@ function updateColorModeAvailability() {
 }
 
 let lastPdb = null;
-// rerender=false refreshes only the text/track, preserving the current rotation and zoom.
 function applyMutations(rerender = true) {
   if (!currentProtein || !lastPdb) return;
   const { parsed, bad } = parseMutations($("muts").value);
@@ -1084,7 +1015,10 @@ function applyMutations(rerender = true) {
   }
 }
 
+let hasLoadedGene = false;
+let loadToken = 0;
 async function load() {
+  const myToken = ++loadToken;
   const gene = $("gene").value.trim().toUpperCase().replace(/[^A-Z0-9-]/g, "");
   if (!gene) { setStatus("Type a gene symbol first.", "err"); return; }
   setStatus(`<span class="spinner"></span> Looking up ${gene} and downloading its structure…`, "info");
@@ -1095,34 +1029,42 @@ async function load() {
   $("pockets").innerHTML = sk;
   $("resDetail").innerHTML = '<div class="empty">Click any residue — a ranked target, a hotspot, or a tick on the position map — to see what it does and why it matters here.</div>';
   currentEngine = null; currentAM = null; amUrl = null; spotlightPos = null;
+  if (hasLoadedGene) $("muts").value = "";
+  hasLoadedGene = true;
   try {
     const protein = await fetchProtein(gene);
+    if (myToken !== loadToken) return;
     if (!protein) { setStatus(`No reviewed human protein found for <b>${gene}</b>. Check the symbol.`, "err"); return; }
     currentProtein = protein;
     currentHotspots = [];
     renderDetails(protein);
     renderAbout(protein);
-    const enginePromise = fetchEngine(gene);  // precomputed dynamics/priority (featured genes)
+    const enginePromise = fetchEngine(gene);
     lastPdb = await fetchStructure(protein.accession);
+    if (myToken !== loadToken) return;
     currentEngine = await enginePromise;
+    if (myToken !== loadToken) return;
     renderPockets(currentEngine);
     updateColorModeAvailability();
     applyMutations();
-    // AlphaMissense is best-effort and large-ish; load it without blocking the render.
     fetchAlphaMissense(amUrl).then(am => {
+      if (myToken !== loadToken) return;
       currentAM = am;
       updateColorModeAvailability();
       if ($("colormode").value === "path") applyMutations();
     });
-    // Hotspots are best-effort and must not block the structure render.
     fetchHotspots(gene).then(list => {
+      if (myToken !== loadToken) return;
       renderHotspots(list);
       renderCancerTypes(list);
       renderPriority(currentEngine);
       applyMutations(false);
-    }).catch(() => { renderHotspots([]); renderCancerTypes([]); renderPriority(currentEngine); });
+    }).catch(() => {
+      if (myToken !== loadToken) return;
+      renderHotspots([]); renderCancerTypes([]); renderPriority(currentEngine);
+    });
   } catch (e) {
-    setStatus("Error: " + e.message, "err");
+    if (myToken === loadToken) setStatus("Error: " + e.message, "err");
   }
 }
 
@@ -1137,19 +1079,7 @@ $("zoom").addEventListener("input", e => setZoom(+e.target.value));
 $("resetView").onclick = () => { if (!viewer) return; viewer.zoomTo(); currentZoom = 1; $("zoom").value = "1"; viewer.render(); };
 $("trackClear").onclick = clearMutations;
 
-// ── Beginner / Expert detail level ───────────────────────────────────────────
-function setMode(mode) {
-  document.body.classList.toggle("mode-beginner", mode === "beginner");
-  document.body.classList.toggle("mode-expert", mode === "expert");
-  $("modeSwitch").querySelectorAll(".ms-opt").forEach(b => b.classList.toggle("active", b.dataset.mode === mode));
-  try { localStorage.setItem("cpe_mode", mode); } catch (e) {}
-}
-$("modeSwitch").querySelectorAll(".ms-opt").forEach(b => b.onclick = () => setMode(b.dataset.mode));
-let savedMode = "beginner";
-try { savedMode = localStorage.getItem("cpe_mode") || "beginner"; } catch (e) {}
-setMode(savedMode);
-
-// ── Glossary modal ───────────────────────────────────────────────────────────
+// Target Priority Score entry mirrors cancer_tool/scoring.py DEFAULT_WEIGHTS — update both.
 const GLOSSARY = [
   ["Oncogene", ROLE_DEF["Oncogene"]],
   ["Tumor suppressor", ROLE_DEF["Tumor suppressor"]],
@@ -1169,69 +1099,11 @@ $("glossaryBtn").onclick = openGlossary;
 $("glossaryX").onclick = closeGlossary;
 $("glossaryModal").addEventListener("click", e => { if (e.target === $("glossaryModal")) closeGlossary(); });
 
-// ── Guided tour (coachmarks) ─────────────────────────────────────────────────
-const TOUR = [
-  ["#gene", "Pick a protein", "Type a cancer gene (TP53, KRAS, BRAF…) or click an example chip, then Load. The real AlphaFold structure downloads into your browser."],
-  ["#viewer", "Explore in 3D", "Drag to spin the folded protein, use the gold slider to zoom. The coloured ribbon is the chain; the colour mode is set on the left."],
-  ["#postrack", "The position map", "Every gold tick is a mutation hotspot along the chain — taller = more tumours. Click one to spotlight that residue in 3D."],
-  ["#priorityCard", "Ranked targets", "A shortlist of the most actionable driver residues, fusing how often they're mutated, how damaging, how druggable, and how structurally critical. Click a row for the full story."],
-  ["#resCard", "Residue spotlight", "Whatever residue you click lands here in plain English — what it does, how often it's mutated, and why it might be a drug target."],
-  ["#displayPanel", "Colour & pockets", "Recolour the structure by AlphaFold confidence, AlphaMissense pathogenicity, flexibility, or priority — and overlay the druggable pockets a drug could bind."],
-];
-let tourStep = 0;
-function showTourStep() {
-  const [sel, title, body] = TOUR[tourStep];
-  const el = document.querySelector(sel);
-  if (!el) { tourStep++; return tourStep < TOUR.length ? showTourStep() : endTour(true); }
-  $("tourTitle").textContent = title; $("tourBody").textContent = body;
-  $("tourSteps").textContent = `${tourStep + 1} / ${TOUR.length}`;
-  $("tourBack").style.visibility = tourStep === 0 ? "hidden" : "visible";
-  $("tourNext").textContent = tourStep === TOUR.length - 1 ? "Done" : "Next";
-  // Scroll the target into view FIRST (instant — a smooth/async scroll would leave
-  // getBoundingClientRect reading stale, often off-screen coordinates), then place the
-  // spotlight + popover on the next frame once layout has settled.
-  el.scrollIntoView({ block: "center", inline: "nearest" });
-  requestAnimationFrame(() => placeTourOn(el));
-}
-function placeTourOn(el) {
-  const r = el.getBoundingClientRect();
-  const vh = window.innerHeight, vw = window.innerWidth;
-  const spot = $("tourSpot"), pop = $("tourPop");
-  // Clamp the highlight box to the viewport so the spotlight never collapses off-screen.
-  const top = Math.max(0, r.top), left = Math.max(0, r.left);
-  const bottom = Math.min(vh, r.bottom), right = Math.min(vw, r.right);
-  spot.style.left = (left - 6) + "px"; spot.style.top = (top - 6) + "px";
-  spot.style.width = Math.max(0, right - left + 12) + "px";
-  spot.style.height = Math.max(0, bottom - top + 12) + "px";
-  // Prefer the popover below the highlight; flip above if it would overflow the bottom.
-  const ph = pop.offsetHeight || 200, pw = pop.offsetWidth || 320;
-  let pTop = bottom + 14;
-  if (pTop + ph > vh - 12) pTop = top - ph - 14;
-  pTop = Math.max(12, Math.min(vh - ph - 12, pTop));
-  const pLeft = Math.max(12, Math.min(vw - pw - 12, left));
-  pop.style.top = pTop + "px"; pop.style.left = pLeft + "px";
-}
-function startTour() { tourStep = 0; $("tourMask").classList.add("open"); showTourStep(); }
-function endTour(done) {
-  $("tourMask").classList.remove("open");
-  if (done) { try { localStorage.setItem("cpe_seen", "1"); } catch (e) {} }
-}
-$("tourBtn").onclick = startTour;
-$("tourNext").onclick = () => { if (tourStep === TOUR.length - 1) endTour(true); else { tourStep++; showTourStep(); } };
-$("tourBack").onclick = () => { if (tourStep > 0) { tourStep--; showTourStep(); } };
-$("tourSkip").onclick = () => endTour(true);
-window.addEventListener("resize", () => { if ($("tourMask").classList.contains("open")) showTourStep(); });
-
-// Stop wheel events before 3Dmol's canvas zooms, so the page scrolls normally over the viewer.
 document.querySelector(".viewer-wrap")
   .addEventListener("wheel", e => e.stopPropagation(), { capture: true, passive: true });
 
 load();
-// Auto-run the tour on a first-ever visit, once the page has settled.
-try { if (!localStorage.getItem("cpe_seen")) setTimeout(startTour, 900); } catch (e) {}
 
-// ── Header emblem: a spinning crimson DNA double-helix (ported from the Vedra
-//    Research portfolio's VR-01 visual). Self-contained, isolated from the app. ──
 (function () {
   const canvas = document.getElementById("helixEmblem");
   if (!canvas) return;

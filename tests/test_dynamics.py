@@ -1,7 +1,3 @@
-"""ENM/NMA dynamics tests on a synthetic α-helix (no network). A free helix
-fluctuates most at its termini and least in the middle — the analysis must reproduce that.
-"""
-
 import math
 
 import numpy as np
@@ -10,7 +6,6 @@ from cancer_tool import dynamics
 
 
 def _alpha_helix_pdb(n: int = 16) -> str:
-    """Generate PDB text for an idealised α-helix of ``n`` Cα atoms."""
     radius, rise, turn = 2.3, 1.5, math.radians(100.0)
     lines = []
     for i in range(n):
@@ -37,14 +32,14 @@ def test_flexibility_is_normalised():
     flex = dynamics.compute_dynamics(_alpha_helix_pdb(16))["flexibility"]
     assert min(flex) >= 0.0
     assert max(flex) <= 1.0
-    assert math.isclose(max(flex), 1.0, abs_tol=1e-6)  # min-max scaled
+    assert math.isclose(max(flex), 1.0, abs_tol=1e-6)
 
 
 def test_termini_more_flexible_than_core():
     flex = dynamics.compute_dynamics(_alpha_helix_pdb(20))["flexibility"]
     core_mean = float(np.mean(flex[8:12]))
     termini_mean = float(np.mean([flex[0], flex[1], flex[-2], flex[-1]]))
-    assert termini_mean > core_mean  # classic ENM result
+    assert termini_mean > core_mean
 
 
 def test_rigidity_is_complement_of_flexibility():
@@ -67,7 +62,6 @@ def test_lookup_helpers_align_positions():
 
 
 def test_plddt_is_read_from_b_factors():
-    # The synthetic helix carries B-factor 50.00 on every Cα.
     result = dynamics.compute_dynamics(_alpha_helix_pdb(12))
     assert len(result["plddt"]) == 12
     assert all(b == 50.0 for b in result["plddt"])

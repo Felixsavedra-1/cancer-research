@@ -1,5 +1,3 @@
-"""Parse and validate point mutations, and fetch known cancer hotspots."""
-
 from __future__ import annotations
 
 import re
@@ -11,7 +9,6 @@ CANCER_HOTSPOTS = "https://www.cancerhotspots.org/api/hotspots/single"
 
 
 def parse_mutation(text: str) -> dict | None:
-    """Parse a single mutation like ``R175H`` into ``{wt, position, mut, label}``."""
     match = _MUTATION_RE.match(text or "")
     if not match:
         return None
@@ -20,7 +17,6 @@ def parse_mutation(text: str) -> dict | None:
 
 
 def parse_mutations(text: str) -> tuple[list[dict], list[str]]:
-    """Parse a comma/space/newline separated list into ``(parsed, unparseable)``."""
     tokens = [t for t in re.split(r"[,\s]+", text or "") if t]
     parsed, bad = [], []
     for token in tokens:
@@ -30,7 +26,6 @@ def parse_mutations(text: str) -> tuple[list[dict], list[str]]:
 
 
 def validate_mutation(mutation: dict, sequence: str) -> tuple[bool, str]:
-    """Check a parsed mutation's position and wild-type residue against the sequence."""
     pos = mutation["position"]
     if pos < 1 or pos > len(sequence):
         return False, f"Position {pos} is outside the protein (length {len(sequence)})."
@@ -45,11 +40,6 @@ def validate_mutation(mutation: dict, sequence: str) -> tuple[bool, str]:
 
 
 def fetch_hotspots(gene: str, session: requests.Session | None = None) -> list[dict]:
-    """Return recurrent cancer hotspots for a gene, sorted by tumour count (descending).
-
-    Each item is ``{residue, position, count, variants}``. The API serves the full
-    single-residue set, so the gene filter is applied client-side.
-    """
     http = session or requests
     resp = http.get(CANCER_HOTSPOTS, headers={"Accept": "application/json"}, timeout=60)
     if not resp.ok:

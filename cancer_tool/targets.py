@@ -1,8 +1,3 @@
-"""Target context from the Open Targets Platform GraphQL API: clinical tractability
-(modalities) and top disease associations. Best-effort enrichment — any failure yields
-``None`` and never blocks the page.
-"""
-
 from __future__ import annotations
 
 import requests
@@ -29,7 +24,6 @@ query Target($id: String!) {
 }
 """
 
-# Modality codes Open Targets uses in tractability buckets.
 _MODALITY_LABELS = {"SM": "Small molecule", "AB": "Antibody", "PR": "PROTAC", "OC": "Other"}
 
 
@@ -49,17 +43,6 @@ def _post(query: str, variables: dict, session: requests.Session | None) -> dict
 def fetch_target_context(
     gene: str, session: requests.Session | None = None
 ) -> dict | None:
-    """Return tractability + top disease associations for a gene, or ``None``.
-
-    Result shape::
-
-        {"ensembl_id": "ENSG...",
-         "symbol": "TP53",
-         "tractability": [{"modality": "Small molecule", "label": "Advanced Clinical"}, ...],
-         "top_diseases": [{"name": "Li-Fraumeni syndrome", "score": 0.88}, ...]}
-
-    Only tractability buckets that are *true* (the assessment passed) are returned.
-    """
     try:
         found = _post(_SEARCH_QUERY, {"q": gene}, session)
         hits = (found or {}).get("search", {}).get("hits", []) if found else []

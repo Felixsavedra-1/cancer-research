@@ -1,5 +1,3 @@
-"""Resolve a human gene symbol to its reviewed UniProt protein record."""
-
 from __future__ import annotations
 
 import requests
@@ -8,10 +6,6 @@ UNIPROT_SEARCH = "https://rest.uniprot.org/uniprotkb/search"
 
 
 def get_protein(gene: str, session: requests.Session | None = None) -> dict | None:
-    """Look up a reviewed human protein by gene symbol.
-
-    Returns ``{accession, name, gene, sequence, length}`` or ``None`` if no match.
-    """
     http = session or requests
     params = {
         "query": f"gene_exact:{gene} AND organism_id:9606 AND reviewed:true",
