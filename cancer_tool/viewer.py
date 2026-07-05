@@ -1,3 +1,10 @@
+"""3D structure rendering via py3Dmol.
+
+Colours the cartoon by one of three modes — pLDDT confidence, ENM/NMA
+flexibility, or the Target Priority Score — and overlays pocket surfaces and
+highlighted mutation residues. Pure view construction; returns embeddable HTML.
+"""
+
 from __future__ import annotations
 
 _HIGHLIGHT_COLORS = ["magenta", "orange", "lime", "cyan", "yellow", "red"]

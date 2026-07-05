@@ -333,22 +333,13 @@
         <input type="checkbox" id="pockToggle" />
         <span>Show <span class="term" title="A pocket on the protein surface big and enclosed enough that a drug molecule could plausibly bind there.">druggable pockets</span></span>
       </label>
+      <label class="pockrow" id="labelToggleRow" title="Pin text tags on the fold: the top cancer-driver residues and the protein's named functional regions">
+        <input type="checkbox" id="labelToggle" />
+        <span>Show labels <span class="muted">— key residues &amp; domains</span></span>
+      </label>
     </div>
 
     <button class="primary" id="load">Load structure</button>
-
-    <details>
-      <summary>What am I looking at?</summary>
-      This tool downloads the <b>real predicted 3D structure</b> of a protein from the
-      AlphaFold database and draws it in your browser. Cancer is often driven by
-      <b>mutations</b> that change a single building block (amino acid) of a protein.
-      Type a mutation like <code>R175H</code> to see exactly where on the protein it lands —
-      mutations buried in the protein's core often break its function.
-      <p class="caveat">Scope: single-chain (monomer) models only; pockets come from a
-      LIGSITE-style geometric scan, not a chemistry-aware docking method; folding dynamics
-      are down-weighted by AlphaFold pLDDT confidence. The ranking rediscovers known biology
-      but is <b>not clinically validated</b> — research and education use only.</p>
-    </details>
   </aside>
 
   <main>
@@ -384,21 +375,9 @@
           <span class="legend-plain">how sure the AI is about each part's shape</span>
           <span class="term" title="pLDDT — AlphaFold's per-residue confidence score (0–100) for how sure it is about that part's predicted shape.">(pLDDT)</span>
         </div>
-        <details style="margin-top:12px">
-          <summary>How to read this</summary>
-          <b>Drag</b> to spin the protein · use the <b>gold slider</b> on the left to zoom ·
-          scroll normally to move down the page. The ribbon is the protein's folded chain.
-          When "colour by confidence" is on, colour shows <b>how sure the AI is</b> about each
-          part's shape (red = less sure, blue = very sure) — it is not a medical signal.
-          The <b>glowing spheres</b> are the exact spots where the cancer mutations you typed land.
-        </details>
       </div>
 
       <div class="context">
-        <div class="card res-card" id="resCard">
-          <h3>Residue spotlight</h3>
-          <div id="resDetail"><div class="empty">Click any residue — a ranked target, a hotspot, or a tick on the position map — to see what it does and why it matters here.</div></div>
-        </div>
         <div class="card about">
           <h3>About this protein</h3>
           <div id="about"><div class="muted">Load a protein to see what it does and why it matters.</div></div>
@@ -414,9 +393,9 @@
       </div>
     </div>
 
-    <div class="card" id="priorityCard">
-      <h3>🎯 Target Priority <span class="muted" style="font-weight:400">— ranked druggable cancer-driver residues</span></h3>
-      <div id="priority"><div class="muted">A ranked shortlist of the most actionable residues — recurrence × pathogenicity × druggability × structural criticality — appears here for the featured genes.</div></div>
+    <div class="card res-card" id="resCard">
+      <h3>Residue spotlight</h3>
+      <div id="resDetail"><div class="empty">Click any residue — a ranked target, a hotspot, or a tick on the position map — to see what it does and why it matters here.</div></div>
     </div>
 
     <div class="grid2">
@@ -430,18 +409,12 @@
       </div>
     </div>
 
-    <div class="card note">
-      <span class="eyebrow">Why this exists</span>
-      <p>I built this to make real cancer-genomics data something <b>anyone can explore in a
-      browser</b> — see a protein's true 3D shape and exactly where the mutations that drive
-      cancer land on it. It's a <b>research and education tool</b>, not medical advice.</p>
-    </div>
-
     <div class="muted">
       Data: <a href="https://www.uniprot.org" target="_blank">UniProt</a> ·
       <a href="https://alphafold.ebi.ac.uk" target="_blank">AlphaFold DB</a> ·
       <a href="https://www.cancerhotspots.org" target="_blank">cancerhotspots.org</a>.
       Structures are AI predictions; colour shows how confident the model is.
+      <b>Research and education use only</b> — not medical advice.
     </div>
   </main>
 </div>
@@ -468,6 +441,7 @@ let currentEngine = null;
 let currentAM = null;
 let amUrl = null;
 let showPockets = false;
+let showLabels = false;
 let spotlightPos = null;
 
 const FLEX_STOPS = [[60,90,230],[230,230,230],[220,60,60]];
@@ -489,12 +463,27 @@ function lerpColor(v, stops) {
   return `0x${[c(0),c(1),c(2)].map(x=>x.toString(16).padStart(2,"0")).join("")}`;
 }
 
+// Optional live-analysis backend (cancer_tool FastAPI). Configure it with a
+// `?api=https://host` query param or a global `window.EXPLORER_API_BASE`. When
+// absent or unreachable the tool degrades gracefully to today's static behaviour.
+const API_BASE = (new URLSearchParams(location.search).get("api")
+  || window.EXPLORER_API_BASE || "").replace(/\/+$/, "");
+
 async function fetchEngine(gene) {
+  const G = gene.toUpperCase();
+  // 1) Precomputed static file — always tried first so zero-install still works.
   try {
-    const r = await fetch(`data/${gene.toUpperCase()}.json`, { cache: "no-cache" });
-    if (!r.ok) return null;
-    return await r.json();
-  } catch (e) { return null; }
+    const r = await fetch(`data/${G}.json`, { cache: "no-cache" });
+    if (r.ok) return await r.json();
+  } catch (e) { /* fall through */ }
+  // 2) Live API for any other gene, if one is configured and reachable.
+  if (API_BASE) {
+    try {
+      const r = await fetch(`${API_BASE}/analyze/${G}`);
+      if (r.ok) return await r.json();
+    } catch (e) { /* fall through to static-only behaviour */ }
+  }
+  return null;
 }
 
 const GENE_INFO = {
@@ -534,6 +523,8 @@ function addMutation(label) {
   set.add(label.toUpperCase());
   $("muts").value = [...set].join(", ");
   applyMutations();
+  const pos = parseInt(label.match(/\d+/)?.[0], 10);
+  if (Number.isFinite(pos)) selectResidue(pos);
 }
 
 function removeMutation(label) {
@@ -596,6 +587,13 @@ function setZoom(v) {
 const AA3 = {ALA:"A",ARG:"R",ASN:"N",ASP:"D",CYS:"C",GLN:"Q",GLU:"E",GLY:"G",HIS:"H",
   ILE:"I",LEU:"L",LYS:"K",MET:"M",PHE:"F",PRO:"P",SER:"S",THR:"T",TRP:"W",TYR:"Y",VAL:"V",TER:"*"};
 const to1 = aa => AA3[aa.toUpperCase()] || aa;
+const AA_NAME = {
+  A:["Ala","Alanine"], R:["Arg","Arginine"], N:["Asn","Asparagine"], D:["Asp","Aspartate"],
+  C:["Cys","Cysteine"], Q:["Gln","Glutamine"], E:["Glu","Glutamate"], G:["Gly","Glycine"],
+  H:["His","Histidine"], I:["Ile","Isoleucine"], L:["Leu","Leucine"], K:["Lys","Lysine"],
+  M:["Met","Methionine"], F:["Phe","Phenylalanine"], P:["Pro","Proline"], S:["Ser","Serine"],
+  T:["Thr","Threonine"], W:["Trp","Tryptophan"], Y:["Tyr","Tyrosine"], V:["Val","Valine"]
+};
 
 function parseMutations(text) {
   const tokens = (text || "").split(/[,\s]+/).filter(Boolean);
@@ -626,7 +624,8 @@ async function fetchJson(url, errorMessage) {
 async function fetchProtein(gene) {
   const q = `gene_exact:${gene} AND organism_id:9606 AND reviewed:true`;
   const url = `https://rest.uniprot.org/uniprotkb/search?query=${encodeURIComponent(q)}`
-            + `&fields=accession,protein_name,sequence,cc_function&format=json&size=1`;
+            + `&fields=accession,protein_name,sequence,cc_function,ft_domain,ft_region,ft_dna_bind,ft_zn_fing`
+            + `&format=json&size=1`;
   const results = (await fetchJson(url, "UniProt lookup failed")).results || [];
   if (!results.length) return null;
   const rec = results[0];
@@ -637,7 +636,27 @@ async function fetchProtein(gene) {
   functionText = functionText.replace(/\s*\(PubMed:[^)]*\)/g, "").replace(/\s*\{[^}]*\}/g, "").trim();
   const firstTwo = functionText.match(/^(.*?[.!?])(\s+.*?[.!?])?/);
   if (firstTwo) functionText = (firstTwo[1] + (firstTwo[2] || "")).trim();
-  return { accession: rec.primaryAccession, name, sequence, length: sequence.length, gene: gene.toUpperCase(), functionText };
+  return { accession: rec.primaryAccession, name, sequence, length: sequence.length,
+           gene: gene.toUpperCase(), functionText, regions: parseRegions(rec.features) };
+}
+
+// Named functional regions for the "Show labels" overlay. Drop low-signal noise
+// (disorder/bias and the many overlapping "interaction with X" annotations), and
+// rank real structural units (domains, DNA-binding, zinc fingers) ahead of generic
+// regions, so the few labels shown are the ones worth learning.
+function parseRegions(features) {
+  const skip = /disorder|compositional bias|interaction|region of interest/i;
+  const structural = /domain|dna binding|zinc finger|zn finger/i;
+  const out = [];
+  for (const f of features || []) {
+    const start = f.location?.start?.value, end = f.location?.end?.value;
+    const type = (f.type || "").trim();
+    const name = (f.description || type).trim();
+    if (start == null || end == null || !name || skip.test(name)) continue;
+    out.push({ name, start, end, rank: structural.test(type) ? 0 : 1 });
+  }
+  out.sort((a, b) => a.rank - b.rank || (b.end - b.start) - (a.end - a.start));
+  return out.slice(0, 4).map(({ name, start, end }) => ({ name, start, end }));
 }
 
 async function fetchStructure(accession) {
@@ -712,7 +731,7 @@ function colorResiduesByValue(values, stops) {
 }
 
 function renderStructure(pdb, highlights, mode) {
-  if (!viewer) viewer = $3Dmol.createViewer($("viewer"), { backgroundColor: "0x0A0A0B" });
+  if (!viewer) { viewer = $3Dmol.createViewer($("viewer"), { backgroundColor: "0x0A0A0B" }); $("viewer").style.cursor = "pointer"; }
   viewer.clear();
   viewer.addModel(pdb, "pdb");
   const eng = currentEngine;
@@ -740,16 +759,20 @@ function renderStructure(pdb, highlights, mode) {
   }
   highlights.forEach((h, i) => {
     const color = HIGHLIGHT_COLORS[i % HIGHLIGHT_COLORS.length];
-    const sel = { resi: h.position };
+    const sel = { resi: h.pos };
     viewer.addStyle(sel, { stick: { color, radius: 0.3 } });
     viewer.addStyle(sel, { sphere: { color, opacity: 0.55 } });
     viewer.addResLabels(sel, { fontSize: 11, backgroundColor: color, backgroundOpacity: 0.75, fontColor: "black" });
   });
-  if (spotlightPos != null && !highlights.some(h => h.position === spotlightPos)) {
+  if (spotlightPos != null && !highlights.some(h => h.pos === spotlightPos)) {
     const sel = { resi: spotlightPos };
     viewer.addStyle(sel, { stick: { color: "0xffffff", radius: 0.28 } });
     viewer.addResLabels(sel, { fontSize: 11, backgroundColor: "0x141417", backgroundOpacity: 0.85, fontColor: "0xE8E3D6" });
   }
+  if (showLabels) drawLabels(highlights);
+  viewer.setClickable({}, true, atom => {
+    if (atom && atom.resi != null) selectResidue(atom.resi);
+  });
   viewer.zoomTo();
   currentZoom = 1;
   const z = $("zoom"); if (z) z.value = "1";
@@ -757,6 +780,9 @@ function renderStructure(pdb, highlights, mode) {
   let tail = highlights.length ? ' <span>· glowing spheres = your mutations</span>' : '';
   if (showPockets && eng && eng.pockets && eng.pockets.length) {
     tail += ` <span><span class="swatch" style="background:#6fb1ff"></span>translucent blobs = <span class="term" title="A pocket on the protein surface big and enclosed enough that a drug molecule could plausibly bind there.">druggable pockets</span></span>`;
+  }
+  if (showLabels) {
+    tail += ` <span><span class="swatch" style="background:#c6a15b"></span>text tags = key residues &amp; protein regions</span>`;
   }
   if (mode === "flex") {
     $("legend").innerHTML = `<span><span class="swatch" style="background:#3c5ae6"></span>rigid core</span>
@@ -784,6 +810,37 @@ function renderStructure(pdb, highlights, mode) {
       <span><span class="swatch" style="background:#3a6ee6"></span>high</span>
       <span class="legend-plain">how sure the AI is about each part's shape</span>
       <span class="term" title="pLDDT — AlphaFold's per-residue confidence score (0–100) for how sure it is about that part's predicted shape.">(pLDDT)</span>${tail}`;
+  }
+}
+
+// "Show labels" overlay: gold tags on the top driver residues (priority for featured
+// genes, else live hotspots) and softer tags on each named UniProt region, anchored to
+// the region's midpoint Cα. Skip residues already labelled as a mutation or spotlight.
+function drawLabels(highlights) {
+  const eng = currentEngine;
+  const taken = new Set(highlights.map(h => h.pos));
+  if (spotlightPos != null) taken.add(spotlightPos);
+  const drivers = (eng && eng.priority && eng.priority.length)
+    ? eng.priority.slice(0, 6).map(r => r.position)
+    : currentHotspots.slice(0, 6).map(h => h.position);
+  for (const pos of drivers) {
+    if (pos == null || taken.has(pos)) continue;
+    taken.add(pos);
+    viewer.addResLabels({ resi: pos }, {
+      fontSize: 11, fontColor: "0x141417",
+      backgroundColor: "0xC6A15B", backgroundOpacity: 0.85,
+    });
+  }
+  for (const rg of (currentProtein && currentProtein.regions) || []) {
+    const mid = Math.round((rg.start + rg.end) / 2);
+    const ca = viewer.selectedAtoms({ resi: mid, atom: "CA" })[0];
+    if (!ca) continue;
+    viewer.addLabel(rg.name, {
+      position: { x: ca.x, y: ca.y, z: ca.z },
+      fontSize: 13, fontColor: "0xE8E3D6",
+      backgroundColor: "0x0A0A0B", backgroundOpacity: 0.7,
+      borderColor: "0xC6A15B", borderThickness: 1,
+    });
   }
 }
 
@@ -850,35 +907,12 @@ function renderHotspots(list) {
   box.querySelectorAll("tr.hot").forEach(tr => tr.onclick = () => selectResidue(+tr.getAttribute("data-pos")));
 }
 
-// Weights mirror cancer_tool/scoring.py DEFAULT_WEIGHTS — update both.
-function renderPriority(eng) {
-  const box = $("priority");
-  if (!eng || !eng.priority || !eng.priority.length) {
-    box.innerHTML = '<div class="muted">Precomputed priority ranking is available for the featured genes (TP53, KRAS, BRAF, KIT, FLT3, IDH2, PTEN, EGFR). For other genes, the live hotspots panel below still works.</div>';
-    return;
-  }
-  const max = Math.max(...eng.priority.map(r => r.score)) || 1;
-  const pip = (v, title) => `<span class="pip" title="${title}: ${(+v).toFixed(2)}"><i style="transform:scaleX(${Math.max(0,Math.min(1,v))})"></i></span>`;
-  const rows = eng.priority.slice(0, 15).map(r => {
-    const col = lerpColor(r.score / max, PRIORITY_STOPS).replace("0x", "#");
-    return `<tr class="hot" data-pos="${r.position}" title="Click for details on ${r.residue}">
-      <td><b>${r.residue}</b></td>
-      <td><div class="scorecell"><div class="track"><div class="fill" style="width:${100*r.score/max}%;background:${col}"></div></div><span class="num">${Math.round(r.score)}</span></div></td>
-      <td><div class="axes">${pip(r.recurrence,"Recurrence")}${pip(r.pathogenicity,"Pathogenicity")}${pip(r.druggability,"Druggability")}${pip(r.criticality,"Criticality")}</div></td>
-      <td class="why" title="${r.rationale}">${r.rationale}</td>
-    </tr>`;
-  }).join("");
-  let summary = "";
-  if (eng.dynamics) summary += `<div class="dyn-line"><b>Folding dynamics:</b> ENM/NMA over ${eng.dynamics.n_modes} modes · hinge/pivot residues ${eng.dynamics.hinges.slice(0,6).join(", ") || "—"}.</div>`;
-  if (eng.pockets && eng.pockets.length) { const p = eng.pockets[0]; summary += `<div class="dyn-line"><b>Druggability:</b> ${eng.pockets.length} pocket(s) detected; top ${p.volume} Å³, druggability ${(+p.druggability).toFixed(2)}.</div>`; }
-  if (eng.targets && eng.targets.tractability && eng.targets.tractability.length) {
-    const mods = [...new Set(eng.targets.tractability.map(t => t.modality))];
-    const dis = eng.targets.top_diseases && eng.targets.top_diseases.length ? ` · top link: ${eng.targets.top_diseases[0].name}` : "";
-    summary += `<div class="dyn-line"><b>Open Targets:</b> tractable via ${mods.join(", ")}${dis}.</div>`;
-  }
-  box.innerHTML = `<table><thead><tr><th>Residue</th><th>Priority</th><th>Recur · Path · Drug · Crit</th><th>Why it ranks here</th></tr></thead><tbody>${rows}</tbody></table>
-    <div class="muted" style="margin-top:8px"><span>Priority = 0.30·recurrence + 0.35·pathogenicity + 0.20·druggability + 0.15·structural criticality. Pathogenicity from DeepMind <b>AlphaMissense</b>; criticality from <b>ENM/NMA</b> dynamics. </span><b>Click a row</b> to spotlight that residue in 3D and read why it ranks here.</div>${summary}`;
-  box.querySelectorAll("tr.hot").forEach(tr => tr.onclick = () => selectResidue(+tr.getAttribute("data-pos")));
+function downloadBlob(name, text, type) {
+  const url = URL.createObjectURL(new Blob([text], { type }));
+  const a = document.createElement("a");
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 function renderPockets(eng) {
@@ -917,6 +951,9 @@ function selectResidue(pos) {
   const hit = currentHotspots.find(x => x.position === pos);
   const wt = (pr && pr.wt) || (currentProtein.sequence[pos - 1]) || "";
   const label = (pr && pr.residue) || (hit && hit.residue) || `${wt}${pos}`;
+  const three = (wt && AA_NAME[wt] ? AA_NAME[wt][0] : wt).toUpperCase();
+  const full = wt && AA_NAME[wt] ? AA_NAME[wt][1] : "";
+  const displayLabel = wt ? `${three}-${pos}` : label;
   const maxHot = (currentHotspots[0] && currentHotspots[0].count) || 1;
 
   let flex = null, isHinge = false;
@@ -951,7 +988,7 @@ function selectResidue(pos) {
     : `<span class="muted">No single-residue substitution recorded to highlight.</span>`;
 
   $("resDetail").innerHTML = `
-    <div class="res-head"><span class="rlabel">${label}</span>${tag}
+    <div class="res-head"><span class="rlabel">${displayLabel}</span>${full ? `<span class="muted"> · ${full}</span>` : ""}${tag}
       ${pr ? `<span class="rtag">priority ${Math.round(pr.score)}</span>` : ""}</div>
     <div class="res-metrics">
       ${metric("Recurrence", recurV, hit ? hit.count.toLocaleString() : "—")}
@@ -985,6 +1022,14 @@ function updateColorModeAvailability() {
   pt.disabled = !hasPock;
   if (!hasPock && pt.checked) { pt.checked = false; showPockets = false; }
   $("pockToggleRow").style.opacity = hasPock ? "1" : ".5";
+
+  const hasLabels = !!((currentEngine && currentEngine.priority && currentEngine.priority.length)
+    || currentHotspots.length
+    || (currentProtein && currentProtein.regions && currentProtein.regions.length));
+  const lt = $("labelToggle");
+  lt.disabled = !hasLabels;
+  if (!hasLabels && lt.checked) { lt.checked = false; showLabels = false; }
+  $("labelToggleRow").style.opacity = hasLabels ? "1" : ".5";
   $("engineNote").textContent = hasEng
     ? "Dynamics, priority & pockets are loaded for this gene." + (hasAM ? "" : " Pathogenicity colouring loads in a moment.")
     : "Dynamics, priority & pockets are precomputed for the featured genes; other genes still get live AlphaMissense pathogenicity.";
@@ -1025,7 +1070,7 @@ async function load() {
   $("proteinTitle").textContent = gene;
   const sk = '<div class="skeleton sk-line" style="width:85%"></div><div class="skeleton sk-line" style="width:96%"></div><div class="skeleton sk-line" style="width:62%"></div>';
   $("about").innerHTML = sk; $("details").innerHTML = sk;
-  $("hotspots").innerHTML = sk; $("cancerTypes").innerHTML = sk; $("priority").innerHTML = sk;
+  $("hotspots").innerHTML = sk; $("cancerTypes").innerHTML = sk;
   $("pockets").innerHTML = sk;
   $("resDetail").innerHTML = '<div class="empty">Click any residue — a ranked target, a hotspot, or a tick on the position map — to see what it does and why it matters here.</div>';
   currentEngine = null; currentAM = null; amUrl = null; spotlightPos = null;
@@ -1057,11 +1102,11 @@ async function load() {
       if (myToken !== loadToken) return;
       renderHotspots(list);
       renderCancerTypes(list);
-      renderPriority(currentEngine);
+      updateColorModeAvailability();
       applyMutations(false);
     }).catch(() => {
       if (myToken !== loadToken) return;
-      renderHotspots([]); renderCancerTypes([]); renderPriority(currentEngine);
+      renderHotspots([]); renderCancerTypes([]);
     });
   } catch (e) {
     if (myToken === loadToken) setStatus("Error: " + e.message, "err");
@@ -1072,9 +1117,14 @@ $("examples").innerHTML = EXAMPLES.map(g => `<span class="chip" data-g="${g}">${
 $("examples").querySelectorAll(".chip").forEach(c => c.onclick = () => { $("gene").value = c.dataset.g; load(); });
 $("load").onclick = load;
 $("gene").addEventListener("keydown", e => { if (e.key === "Enter") load(); });
-$("muts").addEventListener("change", applyMutations);
+$("muts").addEventListener("change", () => {
+  applyMutations();
+  const h = lastHighlights[lastHighlights.length - 1];
+  if (h) selectResidue(h.pos);
+});
 $("colormode").addEventListener("change", applyMutations);
 $("pockToggle").addEventListener("change", e => { showPockets = e.target.checked; applyMutations(); });
+$("labelToggle").addEventListener("change", e => { showLabels = e.target.checked; applyMutations(); });
 $("zoom").addEventListener("input", e => setZoom(+e.target.value));
 $("resetView").onclick = () => { if (!viewer) return; viewer.zoomTo(); currentZoom = 1; $("zoom").value = "1"; viewer.render(); };
 $("trackClear").onclick = clearMutations;

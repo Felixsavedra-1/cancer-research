@@ -1,3 +1,8 @@
+"""Mutation parsing/validation (UI- and network-free) and recurrent-hotspot
+fetching from cancerhotspots.org. The full ``/hotspots/single`` set is fetched
+and filtered by HUGO symbol client-side because per-gene endpoints 404.
+"""
+
 from __future__ import annotations
 
 import re
@@ -40,6 +45,11 @@ def validate_mutation(mutation: dict, sequence: str) -> tuple[bool, str]:
 
 
 def fetch_hotspots(gene: str, session: requests.Session | None = None) -> list[dict]:
+    """Recurrent single-residue hotspots for a gene, sorted by tumour count.
+
+    Each entry is ``{residue, position, count, variants}``. Returns ``[]`` on any
+    failure or when the gene has no single-residue record.
+    """
     http = session or requests
     resp = http.get(CANCER_HOTSPOTS, headers={"Accept": "application/json"}, timeout=60)
     if not resp.ok:

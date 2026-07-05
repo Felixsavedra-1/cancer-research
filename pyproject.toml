@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cancer-protein-explorer"
+version = "0.3.0"
+description = "Target-discovery engine: AlphaFold structure + folding dynamics + AlphaMissense + druggable pockets, fused into a ranked cancer-driver shortlist."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+
+# Core deps; the Streamlit UI extras stay in requirements.txt.
+dependencies = [
+    "requests~=2.31",
+    "pandas~=2.0",
+    "prody~=2.6",
+    "numpy>=1.26,<3",
+    "scipy>=1.10,<2",
+]
+
+[project.optional-dependencies]
+# Live-analysis service (api/main.py); httpx is needed by fastapi's TestClient.
+api = [
+    "fastapi~=0.110",
+    "uvicorn[standard]~=0.29",
+    "httpx~=0.27",
+]
+
+[tool.setuptools]
+# Only the core is packaged; the api service runs from the repo root (uvicorn
+# api.main:app), imported from the working directory.
+packages = ["cancer_tool"]

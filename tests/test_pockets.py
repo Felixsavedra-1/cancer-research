@@ -55,3 +55,35 @@ def test_ligsite_finds_enclosed_cavity():
     assert top["volume"] > pockets.MIN_POCKET_VOLUME
     assert 0.0 < top["druggability"] <= 1.0
     assert top["residues"]
+
+
+_FPOCKET_ATM = """\
+HEADER pocket atoms
+ATOM      1  CA  ALA A  12      11.000  12.000  13.000  1.00  0.00           C
+ATOM      2  CB  ALA A  12      11.500  12.500  13.500  1.00  0.00           C
+ATOM      3  CA  LEU A  45      21.000  22.000  23.000  1.00  0.00           C
+HETATM    4  O   HOH A 300      99.000  99.000  99.000  1.00  0.00           O
+junk line that is not an atom record
+END
+"""
+
+
+def test_parse_pocket_atoms_extracts_residues_and_center():
+    residues, center = pockets._parse_pocket_atoms(_FPOCKET_ATM)
+    # residue numbers are de-duplicated and sorted; HETATM waters are still read
+    assert residues == [12, 45, 300]
+    # centre is the mean of the four parsed atom coordinates
+    assert center == [35.62, 36.38, 37.12]
+
+
+def test_parse_pocket_atoms_handles_empty():
+    assert pockets._parse_pocket_atoms("no atoms here\n") == ([], [0.0, 0.0, 0.0])
+
+
+def test_fpocket_sourced_pocket_scores_druggability():
+    # Regression guard: an fpocket-style pocket must carry its lining residues so
+    # pocket_proximity returns a non-zero druggability (the 20% scoring axis).
+    residues, _ = pockets._parse_pocket_atoms(_FPOCKET_ATM)
+    pocket = {"residues": residues, "druggability": 0.71}
+    assert pockets.pocket_proximity(12, [pocket]) == 0.71
+    assert pockets.pocket_proximity(45, [pocket]) == 0.71

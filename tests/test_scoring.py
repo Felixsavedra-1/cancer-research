@@ -26,7 +26,7 @@ def _dynamics():
         "flexibility": [0.1, 0.9],
         "rigidity": [0.9, 0.1],
         "hinges": [8],
-        "collective_motion": [0.2, 0.8],
+        "mode_amplitude": [0.2, 0.8],
         "n_modes": 5,
     }
 
@@ -111,6 +111,28 @@ def test_weights_perturbation_keeps_top_driver():
             _hotspots(), _pathogenicity(), _dynamics(), _pockets(), SEQUENCE, weights=weights
         )
         assert rows[0]["position"] == top
+
+
+def test_numbering_mismatch_falls_back_to_positional_mean():
+    # AlphaMissense says position 5 is a K, but our sequence/hotspot says R —
+    # a numbering mismatch. The exact-variant score must be ignored in favour of
+    # the positional mean, and the row flagged.
+    patho = _pathogenicity()
+    patho["by_position"][5]["wt"] = "K"
+    rows = scoring.score_residues(_hotspots(), patho, _dynamics(), _pockets(), SEQUENCE)
+    pos5 = next(r for r in rows if r["position"] == 5)
+    assert pos5["numbering_ok"] is False
+    assert pos5["pathogenicity"] == 0.5  # positional mean, not the 0.95 variant
+    assert pos5["am_class"] is None
+
+
+def test_numbering_ok_when_wild_type_agrees():
+    patho = _pathogenicity()
+    patho["by_position"][5]["wt"] = "R"
+    rows = scoring.score_residues(_hotspots(), patho, _dynamics(), _pockets(), SEQUENCE)
+    pos5 = next(r for r in rows if r["position"] == 5)
+    assert pos5["numbering_ok"] is True
+    assert pos5["pathogenicity"] == 0.95
 
 
 def test_custom_weights_override():

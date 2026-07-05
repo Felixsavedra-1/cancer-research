@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from scripts.precompute import validate_payload
+from cancer_tool.pipeline import validate_payload
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 

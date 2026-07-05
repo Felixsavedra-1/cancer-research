@@ -1,3 +1,11 @@
+"""Folding dynamics via elastic-network normal-mode analysis (ProDy).
+
+Recovers the low-frequency collective motions an all-atom MD run would sample —
+per-residue flexibility and hinge sites (GNM), plus the slowest collective mode
+(ANM) — in milliseconds on a CPU from a single structure. See docs/METHODS.md
+for parameters and references.
+"""
+
 from __future__ import annotations
 
 import io
@@ -14,6 +22,13 @@ except Exception:
 
 
 DEFAULT_MODES = 10
+
+# Standard elastic-network cutoffs and a uniform spring constant, kept explicit
+# for reproducibility rather than left to ProDy's defaults.
+DEFAULT_GNM_CUTOFF = 10.0
+DEFAULT_ANM_CUTOFF = 15.0
+DEFAULT_GAMMA = 1.0
+DEFAULT_HINGE_MODES = 3  # slowest GNM modes pooled for hinge zero-crossings
 
 
 class DynamicsError(RuntimeError):
@@ -52,7 +67,34 @@ def _normalize(values: np.ndarray) -> np.ndarray:
     return (values - lo) / (hi - lo)
 
 
-def compute_dynamics(pdb_text: str, n_modes: int = DEFAULT_MODES) -> dict:
+def _degree_of_collectivity(amplitudes: np.ndarray) -> float:
+    """Fraction of residues significantly mobilised by a mode, from per-residue
+    squared displacement amplitudes: ~1 is a global motion, near 0 a localised one."""
+    a2 = np.asarray(amplitudes, dtype=float) ** 2
+    total = a2.sum()
+    if total <= 0 or a2.size == 0:
+        return 0.0
+    a2 = a2 / total
+    nonzero = a2[a2 > 0]
+    entropy = -np.sum(nonzero * np.log(nonzero))
+    return round(float(np.exp(entropy) / a2.size), 4)
+
+
+def compute_dynamics(
+    pdb_text: str,
+    n_modes: int = DEFAULT_MODES,
+    gnm_cutoff: float = DEFAULT_GNM_CUTOFF,
+    anm_cutoff: float = DEFAULT_ANM_CUTOFF,
+    gamma: float = DEFAULT_GAMMA,
+    hinge_modes: int = DEFAULT_HINGE_MODES,
+) -> dict:
+    """Compute folding dynamics from a single structure via elastic-network NMA.
+
+    Returns per-residue flexibility/rigidity, hinge sites, the slowest ANM mode's
+    collectivity, and pLDDT (read from the Cα B-factor column). Cutoffs and gamma
+    are echoed into ``params`` for provenance. flexibility/rigidity are min-max
+    normalised per protein — comparable within a structure, not across.
+    """
     calphas = _parse_calphas(pdb_text)
     n_atoms = calphas.numAtoms()
     resnums = [int(n) for n in calphas.getResnums()]
@@ -60,20 +102,29 @@ def compute_dynamics(pdb_text: str, n_modes: int = DEFAULT_MODES) -> dict:
     n_modes = max(1, min(n_modes, n_atoms - 1))
 
     gnm = GNM("enm")
-    gnm.buildKirchhoff(calphas)
+    gnm.buildKirchhoff(calphas, cutoff=gnm_cutoff, gamma=gamma)
     gnm.calcModes(n_modes=n_modes)
 
     sqflucts = np.asarray(calcSqFlucts(gnm), dtype=float)
     flexibility = _normalize(sqflucts)
 
-    slowest = np.asarray(gnm[0].getEigvec(), dtype=float).ravel()
-    hinges = [resnums[i] for i in _zero_crossings(slowest) if 0 <= i < len(resnums)]
+    # Pool hinges over the slowest few modes, not just the slowest, which alone
+    # misses secondary pivots.
+    n_hinge = max(1, min(hinge_modes, gnm.numModes()))
+    hinge_set: set[int] = set()
+    for m in range(n_hinge):
+        vec = np.asarray(gnm[m].getEigvec(), dtype=float).ravel()
+        for i in _zero_crossings(vec):
+            if 0 <= i < len(resnums):
+                hinge_set.add(resnums[i])
+    hinges = sorted(hinge_set)
 
     anm = ANM("enm")
-    anm.buildHessian(calphas)
+    anm.buildHessian(calphas, cutoff=anm_cutoff, gamma=gamma)
     anm.calcModes(n_modes=min(n_modes, 3 * n_atoms - 6))
     slow_anm = np.asarray(anm[0].getEigvec(), dtype=float).reshape(-1, 3)
-    collective = _normalize(np.linalg.norm(slow_anm, axis=1))
+    amplitude = np.linalg.norm(slow_anm, axis=1)
+    collectivity = _degree_of_collectivity(amplitude)
 
     return {
         "residue_numbers": resnums,
@@ -81,8 +132,16 @@ def compute_dynamics(pdb_text: str, n_modes: int = DEFAULT_MODES) -> dict:
         "flexibility": [round(float(x), 4) for x in flexibility],
         "rigidity": [round(float(1.0 - x), 4) for x in flexibility],
         "hinges": hinges,
-        "collective_motion": [round(float(x), 4) for x in collective],
+        "mode_amplitude": [round(float(x), 4) for x in _normalize(amplitude)],
+        "collectivity": collectivity,
         "n_modes": int(gnm.numModes()),
+        "params": {
+            "gnm_cutoff": gnm_cutoff,
+            "anm_cutoff": anm_cutoff,
+            "gamma": gamma,
+            "n_modes_requested": n_modes,
+            "hinge_modes": n_hinge,
+        },
     }
 
 

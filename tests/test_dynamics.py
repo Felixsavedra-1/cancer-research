@@ -24,8 +24,25 @@ def test_returns_per_residue_arrays():
     result = dynamics.compute_dynamics(_alpha_helix_pdb(16))
     assert len(result["flexibility"]) == 16
     assert len(result["rigidity"]) == 16
-    assert len(result["collective_motion"]) == 16
+    assert len(result["mode_amplitude"]) == 16
     assert result["n_modes"] >= 1
+
+
+def test_records_enm_parameters_for_provenance():
+    result = dynamics.compute_dynamics(_alpha_helix_pdb(16), gnm_cutoff=9.0, gamma=1.0)
+    assert result["params"]["gnm_cutoff"] == 9.0
+    assert result["params"]["anm_cutoff"] == dynamics.DEFAULT_ANM_CUTOFF
+    assert 0.0 <= result["collectivity"] <= 1.0
+
+
+def test_collectivity_high_for_global_mode():
+    # A uniform whole-body amplitude mobilises every residue → collectivity ~1.
+    uniform = np.ones(20)
+    assert dynamics._degree_of_collectivity(uniform) > 0.99
+    # A single mobile residue → collectivity ~1/N.
+    localised = np.zeros(20)
+    localised[0] = 1.0
+    assert dynamics._degree_of_collectivity(localised) < 0.1
 
 
 def test_flexibility_is_normalised():

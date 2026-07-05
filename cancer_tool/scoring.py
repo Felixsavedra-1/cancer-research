@@ -1,3 +1,14 @@
+"""Target Priority Score — the composite target-discovery ranking.
+
+Pure, network-free fusion of four axes into one explainable score:
+
+    0.30·recurrence + 0.35·pathogenicity + 0.20·druggability + 0.15·criticality
+
+Weights are expert-set heuristics, not trained. recurrence and criticality are
+normalised per protein, so scores rank residues within a protein but do not
+compare across proteins. See docs/METHODS.md.
+"""
+
 from __future__ import annotations
 
 from . import dynamics as dyn
@@ -64,6 +75,14 @@ def score_residues(
     sequence: str = "",
     weights: dict | None = None,
 ) -> list[dict]:
+    """Rank hotspot residues by the composite Target Priority Score.
+
+    Fuses recurrence, AlphaMissense pathogenicity, pocket druggability, and
+    ENM/NMA criticality (see module docstring for the formula and weights). Every
+    optional signal degrades gracefully to 0 when absent. Returns rows sorted by
+    descending score, each carrying its sub-scores, a ``numbering_ok`` flag, and a
+    plain-English ``rationale``.
+    """
     weights = weights or DEFAULT_WEIGHTS
     pathogenicity = pathogenicity or {}
     pockets = pockets or []
@@ -82,11 +101,17 @@ def score_residues(
 
         wt = sequence[position - 1] if 0 < position <= len(sequence) else ""
 
+        # cancerhotspots positions may use a different transcript than
+        # AlphaMissense's canonical UniProt numbering; if the wild-type residues
+        # disagree, flag the row and fall back to the positional mean.
+        am_wt = patho.wt_at_position(pathogenicity, position)
+        numbering_ok = (not wt) or (am_wt is None) or (am_wt == wt)
+
         am_label = None
         am_class = None
         path_score = patho.position_pathogenicity(pathogenicity, position)
         top_mut = _most_common_variant(hot.get("variants", {}))
-        if wt and top_mut:
+        if wt and top_mut and numbering_ok:
             variant = patho.variant_score(pathogenicity, f"{wt}{position}{top_mut}")
             if variant:
                 path_score = variant["score"]
@@ -116,6 +141,7 @@ def score_residues(
                 "criticality": round(criticality, 3),
                 "tumours": n_tumours,
                 "am_class": am_class,
+                "numbering_ok": numbering_ok,
                 "rationale": _rationale(components, n_tumours, am_label),
             }
         )

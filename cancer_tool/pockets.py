@@ -1,3 +1,8 @@
+"""Druggable-pocket detection: a pure-Python LIGSITE-style geometric scan, or
+fpocket if its binary is on PATH. LIGSITE ``druggability`` is a normalised volume
+proxy, not chemistry-aware ligandability. See docs/METHODS.md.
+"""
+
 from __future__ import annotations
 
 import io
@@ -54,6 +59,11 @@ def _ray_presence(protein: np.ndarray, d: tuple[int, int, int], steps: int) -> n
 
 
 def detect_pockets(pdb_text: str) -> list[dict]:
+    """Detect druggable pockets, preferring fpocket if installed, else LIGSITE.
+
+    Returns pockets sorted by descending druggability, each with its lining
+    ``residues``, ``volume`` (Å³), ``center``, and ``source``.
+    """
     if shutil.which("fpocket"):
         try:
             return _detect_with_fpocket(pdb_text)
@@ -136,6 +146,28 @@ def _detect_ligsite(pdb_text: str) -> list[dict]:
     return pockets
 
 
+def _parse_pocket_atoms(atom_pdb_text: str) -> tuple[list[int], list[float]]:
+    """Lining-residue numbers and geometric centre from an fpocket
+    ``pocketN_atm.pdb`` (residue seq num in PDB cols 23-26, coords in 31-54)."""
+    residues: set[int] = set()
+    coords: list[tuple[float, float, float]] = []
+    for line in atom_pdb_text.splitlines():
+        if not line.startswith(("ATOM", "HETATM")):
+            continue
+        try:
+            resnum = int(line[22:26])
+            x, y, z = float(line[30:38]), float(line[38:46]), float(line[46:54])
+        except (ValueError, IndexError):
+            continue
+        residues.add(resnum)
+        coords.append((x, y, z))
+    if coords:
+        center = [round(float(c), 2) for c in np.asarray(coords).mean(axis=0)]
+    else:
+        center = [0.0, 0.0, 0.0]
+    return sorted(residues), center
+
+
 def _detect_with_fpocket(pdb_text: str) -> list[dict]:
     import os
     import re
@@ -152,23 +184,32 @@ def _detect_with_fpocket(pdb_text: str) -> list[dict]:
             capture_output=True,
             timeout=300,
         )
-        info_path = os.path.join(tmp, "model_out", "model_info.txt")
+        out_dir = os.path.join(tmp, "model_out")
+        info_path = os.path.join(out_dir, "model_info.txt")
         pockets: list[dict] = []
         if not os.path.exists(info_path):
             return []
         with open(info_path) as fh:
             blocks = fh.read().split("Pocket")
-        for block in blocks[1:]:
+        # blocks[0] is the header preamble; blocks[1:] are "Pocket 1..N" (1-based
+        # in the text), whose atoms live in the 0-based pocket{idx}_atm.pdb files.
+        for idx, block in enumerate(blocks[1:]):
             score = re.search(r"Druggability Score\s*:\s*([\d.]+)", block)
             volume = re.search(r"Volume\s*:\s*([\d.]+)", block)
             if not score:
                 continue
+            residues: list[int] = []
+            center = [0.0, 0.0, 0.0]
+            atm_path = os.path.join(out_dir, "pockets", f"pocket{idx}_atm.pdb")
+            if os.path.exists(atm_path):
+                with open(atm_path) as afh:
+                    residues, center = _parse_pocket_atoms(afh.read())
             pockets.append(
                 {
-                    "residues": [],
+                    "residues": residues,
                     "druggability": round(float(score.group(1)), 4),
                     "volume": round(float(volume.group(1)), 1) if volume else 0.0,
-                    "center": [0.0, 0.0, 0.0],
+                    "center": center,
                     "source": "fpocket",
                 }
             )
@@ -177,6 +218,7 @@ def _detect_with_fpocket(pdb_text: str) -> list[dict]:
 
 
 def pocket_proximity(position: int, pockets: list[dict]) -> float:
+    """Druggability of the best pocket a residue lines, or 0.0 if it lines none."""
     best = 0.0
     for pocket in pockets:
         if position in pocket["residues"]:

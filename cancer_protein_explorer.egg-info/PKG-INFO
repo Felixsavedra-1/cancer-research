@@ -1,3 +1,22 @@
+Metadata-Version: 2.4
+Name: cancer-protein-explorer
+Version: 0.3.0
+Summary: Target-discovery engine: AlphaFold structure + folding dynamics + AlphaMissense + druggable pockets, fused into a ranked cancer-driver shortlist.
+License: MIT
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: requests~=2.31
+Requires-Dist: pandas~=2.0
+Requires-Dist: prody~=2.6
+Requires-Dist: numpy<3,>=1.26
+Requires-Dist: scipy<2,>=1.10
+Provides-Extra: api
+Requires-Dist: fastapi~=0.110; extra == "api"
+Requires-Dist: uvicorn[standard]~=0.29; extra == "api"
+Requires-Dist: httpx~=0.27; extra == "api"
+Dynamic: license-file
+
 # Cancer Research Tool
 
 <p align="center">

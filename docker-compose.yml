@@ -1,0 +1,13 @@
+services:
+  api:
+    build: .
+    ports:
+      - "8100:8100"
+    # Persist the live-computed gene cache across restarts.
+    volumes:
+      - ./data/cache:/app/data/cache
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8100/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3

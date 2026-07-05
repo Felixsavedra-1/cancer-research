@@ -46,3 +46,11 @@ def test_lookup_helpers():
     assert patho.variant_score(parsed, "X999Y") is None
     assert patho.position_pathogenicity(parsed, 1) == 0.70
     assert patho.position_pathogenicity(parsed, 9999) == 0.0
+
+
+def test_records_wild_type_for_numbering_check():
+    parsed = patho.parse_alphamissense_csv(SAMPLE_CSV)
+    assert parsed["by_position"][1]["wt"] == "M"
+    assert parsed["by_position"][175]["wt"] == "R"
+    assert patho.wt_at_position(parsed, 175) == "R"
+    assert patho.wt_at_position(parsed, 9999) is None

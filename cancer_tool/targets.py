@@ -1,3 +1,10 @@
+"""Open Targets tractability and disease associations (best-effort enrichment).
+
+Queries the Open Targets Platform GraphQL API for a target's tractability
+modalities and top associated diseases. Any failure degrades to ``None`` so the
+core ranking never depends on it.
+"""
+
 from __future__ import annotations
 
 import requests
@@ -43,6 +50,10 @@ def _post(query: str, variables: dict, session: requests.Session | None) -> dict
 def fetch_target_context(
     gene: str, session: requests.Session | None = None
 ) -> dict | None:
+    """Tractability + top disease associations for a gene, or ``None``.
+
+    Best-effort: any lookup failure returns ``None`` so the ranking is unaffected.
+    """
     try:
         found = _post(_SEARCH_QUERY, {"q": gene}, session)
         hits = (found or {}).get("search", {}).get("hits", []) if found else []

@@ -379,6 +379,13 @@ if priority_rows:
             ),
         },
     )
+    st.download_button(
+        "⬇ Download ranked residues (CSV)",
+        data=pd.DataFrame(priority_rows).to_csv(index=False).encode(),
+        file_name=f"{gene}_target_priority.csv",
+        mime="text/csv",
+        help="Full ranking with every sub-score and rationale, for your own analysis.",
+    )
     st.caption(
         "Priority = 0.30·recurrence + 0.35·pathogenicity + 0.20·druggability + "
         "0.15·structural criticality. Recurrence: "
