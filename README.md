@@ -4,13 +4,15 @@
   <img src="docs/demo.gif" alt="Cancer Protein Explorer — AlphaFold structure, dynamics, and ranked druggable targets" width="800">
 </p>
 
-A research & education tool that uses Google DeepMind's **AlphaFold** to resolve protein
-folding dynamics and rank druggable cancer-driver residues into a transparent, explainable
-shortlist — on a laptop, no GPU.
+> A research & education tool that leverages Google DeepMind's **AlphaFold** to resolve protein folding dynamics and rank druggable cancer-driver residues into a transparent, explainable shortlist — on a laptop.
 
 <p align="center">
   <img src="https://github.com/Felixsavedra-1/Cancer-Research-tool/actions/workflows/ci.yml/badge.svg" alt="Tests">
   <img src="https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white" alt="Python 3.11">
+  <img src="https://img.shields.io/badge/Streamlit-app-FF4B4B?logo=streamlit&logoColor=white" alt="Streamlit">
+  <img src="https://img.shields.io/badge/AlphaFold-powered-0B3D91" alt="AlphaFold-powered">
+  <img src="https://img.shields.io/badge/AlphaMissense-pathogenicity-0B3D91" alt="AlphaMissense">
+  <img src="https://img.shields.io/badge/use-research%20%2F%20education-informational" alt="Research / Education use">
 </p>
 
 Type a gene — say `TP53`, `KRAS`, or `BRAF`. The tool then:
@@ -22,40 +24,29 @@ Type a gene — say `TP53`, `KRAS`, or `BRAF`. The tool then:
 5. fuses it all into a ranked, explainable shortlist of **candidate cancer-driver residues** —
    each with a plain-English rationale.
 
-> **Does the science hold up?** As a sanity check, TP53's top three ranked residues come out
-> **R273, R248, R175** — the textbook p53 drivers. KRAS tops at **G12**, BRAF at **V600**, EGFR
-> at the **exon-19 deletion / L858 / T790** sites. Rediscovering known biology is reassuring, but
-> it's a sanity check, not validation — so it's also benchmarked.
->
-> **The benchmark, honestly.** Against a curated gold standard of known oncogenic residues across
-> a **27-gene panel**, the score separates true drivers from merely-recurrent residues at
-> **composite AUPRC ≈ 0.68** — about 3× the 0.22 random baseline. Two caveats stated up front:
-> recurrence *alone* is a strong baseline (AUPRC ≈ 0.70) that the composite doesn't quite beat on
-> this recurrence-defined set, and the ENM structural axis carried no ranking signal, so it was
-> **dropped from the score** and kept only as a visualisation. Full harness and ablation live in
-> [`benchmark/REPORT.md`](benchmark/REPORT.md) (regenerate with `python scripts/benchmark.py`).
+No GPU required.
 
-## What it does
+## Highlights
 
-- **Folding dynamics without MD simulation** — Elastic Network Model normal-mode analysis
-  (ProDy) extracts per-residue flexibility, hinge/domain pivots, and collective motion from a
-  single AlphaFold structure, in milliseconds on a CPU. It's the laptop-grade route to the
-  motions a GPU molecular-dynamics run would reveal.
-- **Variant effect from DeepMind AlphaMissense** — every residue carries a predicted
+- **Folding dynamics, no simulation.** Elastic Network Model normal-mode analysis (ProDy)
+  extracts per-residue flexibility, hinge/domain pivots, and collective motion from a single
+  AlphaFold structure — in milliseconds on a CPU. It's the laptop-grade route to the motions a
+  GPU molecular-dynamics run would reveal.
+- **Variant effect from DeepMind AlphaMissense.** Every residue carries a predicted
   pathogenicity score and class (likely benign → pathogenic), pulled from the same AlphaFold DB
   endpoint as the structure.
-- **Druggable-pocket detection** — a LIGSITE-style geometric scan finds enclosed cavities and
-  the residues that line them, the "is this targetable?" axis of the score.
-- **Target Priority Score** — one transparent composite,
-  `0.35·recurrence + 0.41·pathogenicity + 0.24·druggability`, enriched with **Open Targets**
-  tractability and disease links. Folding dynamics is shown for context but is *not* a scored
-  term — the benchmark found it added no ranking signal.
-- **Real AlphaFold structures, zero GPU** — it pulls *finished* models from DeepMind's
-  ~200M-protein set, so all the heavy lifting is a download; nothing runs AlphaFold locally.
-- **Confidence-aware 3D** — `py3Dmol` rendering you can paint by pLDDT confidence, NMA
-  flexibility, or the Target Priority Score.
-- **Pure, unit-tested scientific core** — the dynamics, pathogenicity parsing, and scoring
-  formula have no UI or network dependency, and are covered by a network-free test suite.
+- **Druggable-pocket detection.** A LIGSITE-style geometric scan finds enclosed cavities and the
+  residues that line them — the "is this targetable?" axis of the score.
+- **Target Priority Score — an explainable ranking.** One transparent composite:
+  `0.35·recurrence + 0.41·pathogenicity + 0.24·druggability`. It's enriched with **Open Targets**
+  tractability and disease links. (Folding dynamics is shown for context but is *not* a scored
+  term — the benchmark found it added no ranking signal.)
+- **Real AlphaFold structures, zero GPU.** It pulls *finished* models from DeepMind's
+  ~200M-protein set, so all the heavy lifting is a download — nothing runs AlphaFold locally.
+- **Confidence-aware 3D, three colour modes.** `py3Dmol` rendering you can paint by pLDDT
+  confidence, NMA flexibility, or the Target Priority Score.
+- **Pure, unit-tested scientific core.** The dynamics, pathogenicity parsing, and scoring formula
+  have no UI or network dependency, and are covered by a network-free test suite.
 
 **Tech stack:** Python 3.11 · Streamlit · py3Dmol · ProDy · NumPy/SciPy · pandas · requests · pytest
 
@@ -112,16 +103,20 @@ other genes, so it degrades gracefully to zero-install behaviour when no API is 
 
 </details>
 
-## How it runs on a laptop
+---
 
-Predicting protein structures with AlphaFold needs big GPUs. But DeepMind already ran
-AlphaFold on ~200 million proteins and made the results free. This tool **downloads finished
-structures** instead of computing them, so all the heavy work is done by hosted services and
-the browser — no GPU required.
+<details>
+<summary><b>How it runs on a laptop</b></summary>
 
-## Data sources
+Predicting protein structures with AlphaFold needs big GPUs. But DeepMind already
+ran AlphaFold on ~200 million proteins and made the results free. This tool
+**downloads finished structures** instead of computing them, so all the heavy
+work is done by hosted services and the browser — no GPU required.
 
-All free and public:
+</details>
+
+<details>
+<summary><b>Data sources</b> (all free, public)</summary>
 
 | Data | Source |
 |------|--------|
@@ -133,16 +128,22 @@ All free and public:
 | Folding dynamics (ENM/NMA) | computed locally with [ProDy](http://prody.csb.pitt.edu) |
 | Druggable pockets | computed locally (LIGSITE-style geometric scan) |
 
-## Using the app
+</details>
 
-In the sidebar: pick or type a gene, enter mutations like `R175H` (separate several with
-commas or spaces), and choose how to colour the structure — **pLDDT confidence**,
-**NMA flexibility**, or the **Target Priority Score**. The ranked priority table is the main
-deliverable; click a residue's row to drop it onto the 3D structure. Export the full ranking
-(every sub-score + rationale) as **CSV**, or the whole analysis payload as **JSON**, from the
-buttons on the Target Priority panel.
+<details>
+<summary><b>Using the app</b></summary>
 
-## Architecture
+In the sidebar: pick or type a gene, enter mutations like `R175H` (separate several
+with commas or spaces), and choose how to colour the structure — **pLDDT confidence**,
+**NMA flexibility**, or the **Target Priority Score**. The ranked priority table is the
+main deliverable; click a residue's row to drop it onto the 3D structure. Export the full
+ranking (every sub-score + rationale) as **CSV**, or the whole analysis payload as **JSON**,
+from the buttons on the Target Priority panel — for your own downstream analysis.
+
+</details>
+
+<details>
+<summary><b>Architecture & project layout</b></summary>
 
 ```
 app.py                 Streamlit UI — wires the modules + priority panel together
@@ -176,15 +177,18 @@ python scripts/precompute.py            # all featured genes
 python scripts/precompute.py TP53 KRAS  # specific genes
 ```
 
-## Testing
+</details>
+
+<details>
+<summary><b>Testing</b></summary>
 
 ```bash
 pytest
 ```
 
-The suite needs no network — the scoring formula, ENM/NMA dynamics (on a synthetic fixture),
-AlphaMissense parsing, the ranking metrics, and a full-pipeline reproducibility check
-(KRAS → G12 replayed from captured API responses) all run with no Streamlit/UI or HTTP
+The suite needs no network — the scoring formula, ENM/NMA dynamics (on a synthetic
+fixture), AlphaMissense parsing, the ranking metrics, and a full-pipeline reproducibility
+check (KRAS → G12 replayed from captured API responses) all run with no Streamlit/UI or HTTP
 dependency. CI also lints with `ruff` and enforces a coverage floor across Python 3.11/3.12.
 
 To (re)run the quantitative benchmark against live data:
@@ -194,7 +198,10 @@ pip install ".[benchmark]"          # optional: enables the data-fit weight comp
 python scripts/benchmark.py         # -> benchmark/results.json + REPORT.md
 ```
 
-## Limitations
+</details>
+
+<details>
+<summary><b>Limitations</b></summary>
 
 Honest scope, so the rankings aren't over-read:
 
@@ -214,10 +221,9 @@ Honest scope, so the rankings aren't over-read:
 Full method — the scoring formula and weights, ENM/NMA parameters, and pocket-detection
 caveats — is written up in [`docs/METHODS.md`](docs/METHODS.md).
 
-## Disclaimer
+</details>
 
-⚠️ **Research and education use only.** This is not a medical device. It must not be used for
-diagnosis or treatment decisions.
+---
 
 <table align="center" width="100%">
 <tr>
