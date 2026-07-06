@@ -39,7 +39,102 @@
       "gene": "EGFR",
       "name": "Epidermal growth factor receptor",
       "top": "745-759"
+    },
+    {
+      "gene": "NRAS",
+      "name": "GTPase NRas",
+      "top": "Q61"
+    },
+    {
+      "gene": "PIK3CA",
+      "name": "Phosphatidylinositol 4,5-bisphosphate 3-kinase catalytic subunit alpha isoform",
+      "top": "E542"
+    },
+    {
+      "gene": "HRAS",
+      "name": "GTPase HRas",
+      "top": "Q61"
+    },
+    {
+      "gene": "IDH1",
+      "name": "Isocitrate dehydrogenase [NADP] cytoplasmic",
+      "top": "R132"
+    },
+    {
+      "gene": "AKT1",
+      "name": "RAC-alpha serine/threonine-protein kinase",
+      "top": "E17"
+    },
+    {
+      "gene": "CTNNB1",
+      "name": "Catenin beta-1",
+      "top": "S37"
+    },
+    {
+      "gene": "FBXW7",
+      "name": "F-box/WD repeat-containing protein 7",
+      "top": "R465"
+    },
+    {
+      "gene": "ERBB2",
+      "name": "Receptor tyrosine-protein kinase erbB-2",
+      "top": "S310"
+    },
+    {
+      "gene": "GNAQ",
+      "name": "Guanine nucleotide-binding protein G(q) subunit alpha",
+      "top": "Q209"
+    },
+    {
+      "gene": "GNA11",
+      "name": "Guanine nucleotide-binding protein subunit alpha-11",
+      "top": "Q209"
+    },
+    {
+      "gene": "ESR1",
+      "name": "Estrogen receptor",
+      "top": "D538"
+    },
+    {
+      "gene": "SF3B1",
+      "name": "Splicing factor 3B subunit 1",
+      "top": "K700"
+    },
+    {
+      "gene": "MAP2K1",
+      "name": "Dual specificity mitogen-activated protein kinase kinase 1",
+      "top": "K57"
+    },
+    {
+      "gene": "RAC1",
+      "name": "Ras-related C3 botulinum toxin substrate 1",
+      "top": "P29"
+    },
+    {
+      "gene": "SMAD4",
+      "name": "SMAD family member 4",
+      "top": "R361"
+    },
+    {
+      "gene": "SPOP",
+      "name": "Speckle-type POZ protein",
+      "top": "F133"
+    },
+    {
+      "gene": "RHOA",
+      "name": "Transforming protein RhoA",
+      "top": "G17"
+    },
+    {
+      "gene": "U2AF1",
+      "name": "Splicing factor U2AF 35 kDa subunit",
+      "top": "S34"
+    },
+    {
+      "gene": "POLE",
+      "name": "DNA polymerase epsilon catalytic subunit A",
+      "top": "P286"
     }
   ],
-  "generated": "2026-06-20"
+  "generated": "2026-07-05"
 }

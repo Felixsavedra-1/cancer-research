@@ -66,6 +66,40 @@ the wild-type residue AlphaMissense assumes at that position
 flagged `numbering_ok = false` and falls back to the positional mean pathogenicity, so a
 transcript mismatch can't silently inject a wrong exact-variant score.
 
+## Benchmark — quantitative validation
+
+Rediscovering a handful of textbook drivers is a sanity check, not validation. So the
+score is benchmarked against a curated, literature-backed gold standard of known oncogenic
+residues (`benchmark/gold_standard.json`, from OncoKB / cancerhotspots / Vogelstein 2013)
+across a **27-gene panel** — far beyond the eight featured genes.
+
+`scripts/benchmark.py` runs the live pipeline over the panel and evaluates the ranking with
+pure-NumPy metrics (`cancer_tool/metrics.py`, unit-tested in `tests/test_metrics.py`).
+Committed outputs: `benchmark/results.json` and `benchmark/REPORT.md`; a network-free
+`tests/test_benchmark.py` locks the headline numbers in CI.
+
+**The task is deliberately hard.** For each gene the evaluation universe is its *recurrent
+hotspot residues only* — so the score must separate true drivers from residues that are
+*merely recurrent*, not from the rest of the sequence (which would be trivial). Metrics:
+AUROC, AUPRC (average precision — the honest metric when positives are rare), and
+precision/recall@k, pooled and per-gene.
+
+**Result (v0.3.0, 440 residues, 97 positives, prevalence 0.22):** composite AUPRC ≈ **0.63**
+(a ~2.9× lift over the random baseline) with **precision@5 = 1.0** — the top of the ranking,
+which is what a user acts on, is essentially all true drivers.
+
+**Honest caveat, stated because it matters.** On this panel *recurrence alone* scores a
+slightly higher tail AUPRC (~0.70) than the four-axis composite, and the leave-one-out
+ablation shows criticality and druggability slightly *lower* pooled AUPRC. This is expected
+and does not mean the extra axes are worthless: the benchmark's universe is *already-recurrent*
+residues, and the gold-standard positives were themselves partly identified *by* recurrence,
+so recurrence has a built-in edge here that would not transfer to residues where recurrence is
+silent. The composite's value is (a) top-of-list precision, (b) cross-axis explainability, and
+(c) the pathogenicity / druggability / structure signals recurrence cannot provide. A logistic
+model fit on the four axes (5-fold CV) reaches AUPRC ~0.73 and weights recurrence highest —
+reported for comparison in `REPORT.md`; the shipped default stays the expert set, and the
+weights are **not** tuned to this recurrence-biased benchmark.
+
 ## Folding dynamics (ENM/NMA)
 
 `cancer_tool/dynamics.py` extracts low-frequency collective motions from a single AlphaFold

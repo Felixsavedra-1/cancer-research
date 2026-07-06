@@ -1,0 +1,586 @@
+{
+  "generated": "2026-07-05",
+  "tool_version": "0.3.0",
+  "gold_standard": {
+    "references": [
+      {
+        "name": "OncoKB",
+        "doi": "10.1200/PO.17.00011"
+      },
+      {
+        "name": "cancerhotspots (Chang 2016)",
+        "doi": "10.1038/nbt.3391"
+      },
+      {
+        "name": "cancerhotspots 3D (Chang 2018)",
+        "doi": "10.1158/2159-8290.CD-17-0321"
+      },
+      {
+        "name": "Cancer genome landscapes (Vogelstein 2013)",
+        "doi": "10.1126/science.1235122"
+      }
+    ],
+    "description": "Residue-level gold standard for benchmarking the Target Priority Score. Positives are well-established oncogenic driver residues (canonical UniProt numbering) drawn from OncoKB, the cancerhotspots.org publications (Chang et al. 2016, 2018), and Vogelstein et al. 2013. This is a HIGH-PRECISION, not high-recall, set: absence of a residue does not prove it is a passenger. The benchmark evaluates each gene over its RECURRENT hotspot residues only (the hard task: separate true drivers from residues that are merely recurrent), so positives = curated drivers among a gene's hotspots and negatives = the remaining hotspots."
+  },
+  "n_genes_panel": 27,
+  "n_genes_evaluated": 27,
+  "evaluation": {
+    "n_residues": 440,
+    "n_positives": 97,
+    "prevalence": 0.2205,
+    "ablation": {
+      "composite": {
+        "auroc": 0.7912,
+        "auprc": 0.6336,
+        "precision@5": 1.0,
+        "precision@10": 0.9,
+        "precision@20": 0.95,
+        "recall@5": 0.0515,
+        "recall@10": 0.0928,
+        "recall@20": 0.1959
+      },
+      "recurrence_only": {
+        "auroc": 0.8737,
+        "auprc": 0.7023,
+        "precision@5": 1.0,
+        "precision@10": 0.8,
+        "precision@20": 0.85,
+        "recall@5": 0.0515,
+        "recall@10": 0.0825,
+        "recall@20": 0.1753
+      },
+      "pathogenicity_only": {
+        "auroc": 0.6577,
+        "auprc": 0.2693,
+        "precision@5": 0.6,
+        "precision@10": 0.5,
+        "precision@20": 0.5,
+        "recall@5": 0.0309,
+        "recall@10": 0.0515,
+        "recall@20": 0.1031
+      },
+      "druggability_only": {
+        "auroc": 0.616,
+        "auprc": 0.205,
+        "precision@5": 1.0,
+        "precision@10": 0.6,
+        "precision@20": 0.3,
+        "recall@5": 0.0515,
+        "recall@10": 0.0619,
+        "recall@20": 0.0619
+      },
+      "criticality_only": {
+        "auroc": 0.45,
+        "auprc": 0.1985,
+        "precision@5": 0.2,
+        "precision@10": 0.2,
+        "precision@20": 0.2,
+        "recall@5": 0.0103,
+        "recall@10": 0.0206,
+        "recall@20": 0.0412
+      },
+      "drop_recurrence": {
+        "auroc": 0.6369,
+        "auprc": 0.3011,
+        "precision@5": 0.2,
+        "precision@10": 0.2,
+        "precision@20": 0.4,
+        "recall@5": 0.0103,
+        "recall@10": 0.0206,
+        "recall@20": 0.0825
+      },
+      "drop_pathogenicity": {
+        "auroc": 0.7817,
+        "auprc": 0.621,
+        "precision@5": 1.0,
+        "precision@10": 1.0,
+        "precision@20": 0.9,
+        "recall@5": 0.0515,
+        "recall@10": 0.1031,
+        "recall@20": 0.1856
+      },
+      "drop_druggability": {
+        "auroc": 0.7977,
+        "auprc": 0.6852,
+        "precision@5": 1.0,
+        "precision@10": 1.0,
+        "precision@20": 0.95,
+        "recall@5": 0.0515,
+        "recall@10": 0.1031,
+        "recall@20": 0.1959
+      },
+      "drop_criticality": {
+        "auroc": 0.8283,
+        "auprc": 0.6857,
+        "precision@5": 0.8,
+        "precision@10": 0.9,
+        "precision@20": 0.9,
+        "recall@5": 0.0412,
+        "recall@10": 0.0928,
+        "recall@20": 0.1856
+      }
+    },
+    "separation": {
+      "positive_mean_score": 68.1175,
+      "negative_mean_score": 49.6248,
+      "positive_median_score": 67.2,
+      "negative_median_score": 49.3
+    },
+    "learned_weights": {
+      "cv_auprc": 0.7329,
+      "cv_auroc": 0.8738,
+      "coefficients": {
+        "recurrence": 4.8486,
+        "pathogenicity": 1.9704,
+        "druggability": 0.5024,
+        "criticality": -1.3593
+      },
+      "normalized_positive_weights": {
+        "recurrence": 0.6623,
+        "pathogenicity": 0.2691,
+        "druggability": 0.0686,
+        "criticality": 0.0
+      },
+      "expert_weights": {
+        "recurrence": 0.3,
+        "pathogenicity": 0.35,
+        "druggability": 0.2,
+        "criticality": 0.15
+      },
+      "note": "5-fold cross-validated. Weights fit on this panel are reported for comparison only; the shipped default stays the expert set."
+    }
+  },
+  "per_gene": [
+    {
+      "gene": "TP53",
+      "status": "ok",
+      "n_hotspots": 120,
+      "n_positives": 13,
+      "auroc": 0.8591,
+      "auprc": 0.5949,
+      "found_positives": [
+        "C176",
+        "C238",
+        "C242",
+        "G245",
+        "H179",
+        "R158",
+        "R175",
+        "R213",
+        "R248",
+        "R249",
+        "R273",
+        "R282",
+        "Y220"
+      ],
+      "missed_positives": [],
+      "seconds": 0.0
+    },
+    {
+      "gene": "KRAS",
+      "status": "ok",
+      "n_hotspots": 12,
+      "n_positives": 5,
+      "auroc": 0.7429,
+      "auprc": 0.7342,
+      "found_positives": [
+        "A146",
+        "G12",
+        "G13",
+        "K117",
+        "Q61"
+      ],
+      "missed_positives": [],
+      "seconds": 0.0
+    },
+    {
+      "gene": "NRAS",
+      "status": "ok",
+      "n_hotspots": 4,
+      "n_positives": 3,
+      "auroc": 1.0,
+      "auprc": 1.0,
+      "found_positives": [
+        "G12",
+        "G13",
+        "Q61"
+      ],
+      "missed_positives": [],
+      "seconds": 0.0
+    },
+    {
+      "gene": "HRAS",
+      "status": "ok",
+      "n_hotspots": 4,
+      "n_positives": 3,
+      "auroc": 0.6667,
+      "auprc": 0.9167,
+      "found_positives": [
+        "G12",
+        "G13",
+        "Q61"
+      ],
+      "missed_positives": [],
+      "seconds": 0.0
+    },
+    {
+      "gene": "BRAF",
+      "status": "ok",
+      "n_hotspots": 12,
+      "n_positives": 6,
+      "auroc": 0.7361,
+      "auprc": 0.7329,
+      "found_positives": [
+        "G466",
+        "G469",
+        "G596",
+        "K601",
+        "L597",
+        "V600"
+      ],
+      "missed_positives": [],
+      "seconds": 0.0
+    },
+    {
+      "gene": "EGFR",
+      "status": "ok",
+      "n_hotspots": 24,
+      "n_positives": 5,
+      "auroc": 0.6,
+      "auprc": 0.3842,
+      "found_positives": [
+        "G719",
+        "L858",
+        "L861",
+        "S768",
+        "T790"
+      ],
+      "missed_positives": [
+        "onc:797"
+      ],
+      "seconds": 0.0
+    },
+    {
+      "gene": "PIK3CA",
+      "status": "ok",
+      "n_hotspots": 48,
+      "n_positives": 8,
+      "auroc": 0.6813,
+      "auprc": 0.4917,
+      "found_positives": [
+        "C420",
+        "E453",
+        "E542",
+        "E545",
+        "H1047",
+        "M1043",
+        "N345",
+        "Q546"
+      ],
+      "missed_positives": [],
+      "seconds": 0.0
+    },
+    {
+      "gene": "IDH1",
+      "status": "ok",
+      "n_hotspots": 1,
+      "n_positives": 1,
+      "auroc": NaN,
+      "auprc": 1.0,
+      "found_positives": [
+        "R132"
+      ],
+      "missed_positives": [],
+      "seconds": 0.0
+    },
+    {
+      "gene": "IDH2",
+      "status": "ok",
+      "n_hotspots": 2,
+      "n_positives": 2,
+      "auroc": NaN,
+      "auprc": 1.0,
+      "found_positives": [
+        "R140",
+        "R172"
+      ],
+      "missed_positives": [],
+      "seconds": 0.0
+    },
+    {
+      "gene": "KIT",
+      "status": "ok",
+      "n_hotspots": 13,
+      "n_positives": 7,
+      "auroc": 0.619,
+      "auprc": 0.6337,
+      "found_positives": [
+        "D816",
+        "D820",
+        "L576",
+        "N822",
+        "V559",
+        "V560",
+        "W557"
+      ],
+      "missed_positives": [],
+      "seconds": 0.0
+    },
+    {
+      "gene": "PTEN",
+      "status": "ok",
+      "n_hotspots": 48,
+      "n_positives": 5,
+      "auroc": 0.7721,
+      "auprc": 0.5571,
+      "found_positives": [
+        "C124",
+        "G129",
+        "R130",
+        "R173",
+        "R233"
+      ],
+      "missed_positives": [
+        "TSG:159"
+      ],
+      "seconds": 0.0
+    },
+    {
+      "gene": "FLT3",
+      "status": "ok",
+      "n_hotspots": 2,
+      "n_positives": 1,
+      "auroc": 0.0,
+      "auprc": 0.5,
+      "found_positives": [
+        "D835"
+      ],
+      "missed_positives": [
+        "onc:839",
+        "onc:842"
+      ],
+      "seconds": 0.0
+    },
+    {
+      "gene": "AKT1",
+      "status": "ok",
+      "n_hotspots": 5,
+      "n_positives": 1,
+      "auroc": 1.0,
+      "auprc": 1.0,
+      "found_positives": [
+        "E17"
+      ],
+      "missed_positives": [],
+      "seconds": 0.0
+    },
+    {
+      "gene": "CTNNB1",
+      "status": "ok",
+      "n_hotspots": 14,
+      "n_positives": 6,
+      "auroc": 0.8333,
+      "auprc": 0.8302,
+      "found_positives": [
+        "D32",
+        "G34",
+        "S33",
+        "S37",
+        "S45",
+        "T41"
+      ],
+      "missed_positives": [],
+      "seconds": 0.0
+    },
+    {
+      "gene": "FBXW7",
+      "status": "ok",
+      "n_hotspots": 21,
+      "n_positives": 4,
+      "auroc": 1.0,
+      "auprc": 1.0,
+      "found_positives": [
+        "R465",
+        "R479",
+        "R505",
+        "R689"
+      ],
+      "missed_positives": [],
+      "seconds": 0.0
+    },
+    {
+      "gene": "ERBB2",
+      "status": "ok",
+      "n_hotspots": 20,
+      "n_positives": 5,
+      "auroc": 0.84,
+      "auprc": 0.7767,
+      "found_positives": [
+        "D769",
+        "L755",
+        "S310",
+        "V777",
+        "V842"
+      ],
+      "missed_positives": [],
+      "seconds": 0.0
+    },
+    {
+      "gene": "GNAQ",
+      "status": "ok",
+      "n_hotspots": 4,
+      "n_positives": 2,
+      "auroc": 1.0,
+      "auprc": 1.0,
+      "found_positives": [
+        "Q209",
+        "R183"
+      ],
+      "missed_positives": [],
+      "seconds": 0.0
+    },
+    {
+      "gene": "GNA11",
+      "status": "ok",
+      "n_hotspots": 2,
+      "n_positives": 1,
+      "auroc": 1.0,
+      "auprc": 1.0,
+      "found_positives": [
+        "Q209"
+      ],
+      "missed_positives": [],
+      "seconds": 0.0
+    },
+    {
+      "gene": "ESR1",
+      "status": "ok",
+      "n_hotspots": 5,
+      "n_positives": 2,
+      "auroc": 1.0,
+      "auprc": 1.0,
+      "found_positives": [
+        "D538",
+        "Y537"
+      ],
+      "missed_positives": [],
+      "seconds": 0.0
+    },
+    {
+      "gene": "SF3B1",
+      "status": "ok",
+      "n_hotspots": 11,
+      "n_positives": 3,
+      "auroc": 1.0,
+      "auprc": 1.0,
+      "found_positives": [
+        "K666",
+        "K700",
+        "R625"
+      ],
+      "missed_positives": [
+        "onc:622",
+        "onc:662"
+      ],
+      "seconds": 0.0
+    },
+    {
+      "gene": "MAP2K1",
+      "status": "ok",
+      "n_hotspots": 11,
+      "n_positives": 3,
+      "auroc": 0.7083,
+      "auprc": 0.7667,
+      "found_positives": [
+        "K57",
+        "P124",
+        "Q56"
+      ],
+      "missed_positives": [],
+      "seconds": 0.0
+    },
+    {
+      "gene": "RAC1",
+      "status": "ok",
+      "n_hotspots": 8,
+      "n_positives": 1,
+      "auroc": 1.0,
+      "auprc": 1.0,
+      "found_positives": [
+        "P29"
+      ],
+      "missed_positives": [],
+      "seconds": 0.0
+    },
+    {
+      "gene": "SMAD4",
+      "status": "ok",
+      "n_hotspots": 23,
+      "n_positives": 1,
+      "auroc": 1.0,
+      "auprc": 1.0,
+      "found_positives": [
+        "R361"
+      ],
+      "missed_positives": [],
+      "seconds": 0.0
+    },
+    {
+      "gene": "SPOP",
+      "status": "ok",
+      "n_hotspots": 7,
+      "n_positives": 3,
+      "auroc": 1.0,
+      "auprc": 1.0,
+      "found_positives": [
+        "F102",
+        "F133",
+        "W131"
+      ],
+      "missed_positives": [],
+      "seconds": 0.0
+    },
+    {
+      "gene": "RHOA",
+      "status": "ok",
+      "n_hotspots": 12,
+      "n_positives": 2,
+      "auroc": 0.95,
+      "auprc": 0.8333,
+      "found_positives": [
+        "G17",
+        "Y42"
+      ],
+      "missed_positives": [],
+      "seconds": 0.0
+    },
+    {
+      "gene": "U2AF1",
+      "status": "ok",
+      "n_hotspots": 4,
+      "n_positives": 2,
+      "auroc": 0.75,
+      "auprc": 0.8333,
+      "found_positives": [
+        "Q157",
+        "S34"
+      ],
+      "missed_positives": [],
+      "seconds": 0.0
+    },
+    {
+      "gene": "POLE",
+      "status": "ok",
+      "n_hotspots": 3,
+      "n_positives": 2,
+      "auroc": 1.0,
+      "auprc": 1.0,
+      "found_positives": [
+        "P286",
+        "V411"
+      ],
+      "missed_positives": [],
+      "seconds": 0.0
+    }
+  ]
+}

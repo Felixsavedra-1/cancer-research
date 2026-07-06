@@ -5,15 +5,34 @@
   "length": 189,
   "provenance": {
     "tool_version": "0.3.0",
+    "git_commit": "7313dc4",
+    "packages": {
+      "prody": "2.6.1",
+      "numpy": "2.4.6",
+      "scipy": "1.17.1"
+    },
     "alphafold_model": "v6",
-    "fetched": "2026-06-20",
+    "fetched": "2026-07-05",
     "sources": [
       "UniProt",
       "AlphaFold DB",
       "AlphaMissense",
       "cancerhotspots.org",
       "Open Targets"
-    ]
+    ],
+    "enm_params": {
+      "gnm_cutoff": 10.0,
+      "anm_cutoff": 15.0,
+      "gamma": 1.0,
+      "n_modes_requested": 10,
+      "hinge_modes": 3
+    },
+    "weights": {
+      "recurrence": 0.3,
+      "pathogenicity": 0.35,
+      "druggability": 0.2,
+      "criticality": 0.15
+    }
   },
   "priority": [
     {
@@ -27,7 +46,22 @@
       "criticality": 0.697,
       "tumours": 2175,
       "am_class": "LPath",
+      "numbering_ok": true,
       "rationale": "recurrently mutated (2175 tumours); predicted pathogenic (Likely pathogenic); lines a druggable pocket; in a structurally critical site"
+    },
+    {
+      "position": 59,
+      "residue": "A59",
+      "wt": "A",
+      "score": 59.8,
+      "recurrence": 0.006,
+      "pathogenicity": 0.996,
+      "druggability": 0.503,
+      "criticality": 0.979,
+      "tumours": 12,
+      "am_class": "LPath",
+      "numbering_ok": true,
+      "rationale": "mutated in 12 tumours; predicted pathogenic (Likely pathogenic); lines a druggable pocket; in a structurally critical site"
     },
     {
       "position": 13,
@@ -40,6 +74,7 @@
       "criticality": 0.697,
       "tumours": 264,
       "am_class": "LPath",
+      "numbering_ok": true,
       "rationale": "mutated in 264 tumours; predicted pathogenic (Likely pathogenic); lines a druggable pocket; in a structurally critical site"
     },
     {
@@ -53,6 +88,7 @@
       "criticality": 0.695,
       "tumours": 86,
       "am_class": "LPath",
+      "numbering_ok": true,
       "rationale": "mutated in 86 tumours; predicted pathogenic (Likely pathogenic); lines a druggable pocket; in a structurally critical site"
     },
     {
@@ -66,20 +102,8 @@
       "criticality": 0.695,
       "tumours": 18,
       "am_class": "LPath",
+      "numbering_ok": true,
       "rationale": "mutated in 18 tumours; predicted pathogenic (Likely pathogenic); lines a druggable pocket; in a structurally critical site"
-    },
-    {
-      "position": 59,
-      "residue": "A59",
-      "wt": "A",
-      "score": 55.4,
-      "recurrence": 0.006,
-      "pathogenicity": 0.996,
-      "druggability": 0.503,
-      "criticality": 0.684,
-      "tumours": 12,
-      "am_class": "LPath",
-      "rationale": "mutated in 12 tumours; predicted pathogenic (Likely pathogenic); lines a druggable pocket; in a structurally critical site"
     },
     {
       "position": 33,
@@ -92,6 +116,7 @@
       "criticality": 0.567,
       "tumours": 4,
       "am_class": "LPath",
+      "numbering_ok": true,
       "rationale": "mutated in 4 tumours; predicted pathogenic (Likely pathogenic); lines a druggable pocket"
     },
     {
@@ -105,6 +130,7 @@
       "criticality": 0.518,
       "tumours": 24,
       "am_class": null,
+      "numbering_ok": true,
       "rationale": "mutated in 24 tumours; predicted pathogenic (AlphaMissense); lines a druggable pocket"
     },
     {
@@ -118,7 +144,36 @@
       "criticality": 0.698,
       "tumours": 8,
       "am_class": null,
+      "numbering_ok": true,
       "rationale": "mutated in 8 tumours; predicted pathogenic (AlphaMissense); lines a druggable pocket; in a structurally critical site"
+    },
+    {
+      "position": 5,
+      "residue": "K5",
+      "wt": "K",
+      "score": 49.6,
+      "recurrence": 0.001,
+      "pathogenicity": 0.989,
+      "druggability": 0.0,
+      "criticality": 0.998,
+      "tumours": 3,
+      "am_class": "LPath",
+      "numbering_ok": true,
+      "rationale": "mutated in 3 tumours; predicted pathogenic (Likely pathogenic); in a structurally critical site"
+    },
+    {
+      "position": 22,
+      "residue": "Q22",
+      "wt": "Q",
+      "score": 49.3,
+      "recurrence": 0.003,
+      "pathogenicity": 0.98,
+      "druggability": 0.0,
+      "criticality": 0.994,
+      "tumours": 6,
+      "am_class": "LPath",
+      "numbering_ok": true,
+      "rationale": "mutated in 6 tumours; predicted pathogenic (Likely pathogenic); in a structurally critical site"
     },
     {
       "position": 61,
@@ -131,20 +186,8 @@
       "criticality": 0.501,
       "tumours": 190,
       "am_class": "LPath",
+      "numbering_ok": true,
       "rationale": "mutated in 190 tumours; predicted pathogenic (Likely pathogenic)"
-    },
-    {
-      "position": 5,
-      "residue": "K5",
-      "wt": "K",
-      "score": 45.1,
-      "recurrence": 0.001,
-      "pathogenicity": 0.989,
-      "druggability": 0.0,
-      "criticality": 0.698,
-      "tumours": 3,
-      "am_class": "LPath",
-      "rationale": "mutated in 3 tumours; predicted pathogenic (Likely pathogenic); in a structurally critical site"
     },
     {
       "position": 19,
@@ -157,20 +200,8 @@
       "criticality": 0.697,
       "tumours": 12,
       "am_class": "LPath",
+      "numbering_ok": true,
       "rationale": "mutated in 12 tumours; predicted pathogenic (Likely pathogenic); in a structurally critical site"
-    },
-    {
-      "position": 22,
-      "residue": "Q22",
-      "wt": "Q",
-      "score": 44.8,
-      "recurrence": 0.003,
-      "pathogenicity": 0.98,
-      "druggability": 0.0,
-      "criticality": 0.694,
-      "tumours": 6,
-      "am_class": "LPath",
-      "rationale": "mutated in 6 tumours; predicted pathogenic (Likely pathogenic); in a structurally critical site"
     }
   ],
   "dynamics": {
@@ -748,9 +779,42 @@
       1.0
     ],
     "hinges": [
-      165
+      4,
+      5,
+      8,
+      24,
+      26,
+      38,
+      45,
+      50,
+      57,
+      71,
+      72,
+      74,
+      76,
+      78,
+      79,
+      108,
+      109,
+      111,
+      153,
+      155,
+      156,
+      157,
+      165,
+      173,
+      184,
+      186
     ],
-    "n_modes": 10
+    "collectivity": 0.109,
+    "n_modes": 10,
+    "params": {
+      "gnm_cutoff": 10.0,
+      "anm_cutoff": 15.0,
+      "gamma": 1.0,
+      "n_modes_requested": 10,
+      "hinge_modes": 3
+    }
   },
   "pockets": [
     {
@@ -839,24 +903,24 @@
     ],
     "top_diseases": [
       {
+        "name": "Noonan syndrome",
+        "score": 0.834
+      },
+      {
         "name": "Noonan syndrome 3",
-        "score": 0.826
+        "score": 0.829
       },
       {
         "name": "cardiofaciocutaneous syndrome 2",
-        "score": 0.814
-      },
-      {
-        "name": "Noonan syndrome",
-        "score": 0.813
-      },
-      {
-        "name": "non-small cell lung carcinoma",
-        "score": 0.809
+        "score": 0.822
       },
       {
         "name": "cardiofaciocutaneous syndrome",
-        "score": 0.794
+        "score": 0.816
+      },
+      {
+        "name": "non-small cell lung carcinoma",
+        "score": 0.804
       }
     ]
   }

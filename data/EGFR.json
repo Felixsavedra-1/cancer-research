@@ -5,15 +5,34 @@
   "length": 1210,
   "provenance": {
     "tool_version": "0.3.0",
+    "git_commit": "7313dc4",
+    "packages": {
+      "prody": "2.6.1",
+      "numpy": "2.4.6",
+      "scipy": "1.17.1"
+    },
     "alphafold_model": "v6",
-    "fetched": "2026-06-20",
+    "fetched": "2026-07-05",
     "sources": [
       "UniProt",
       "AlphaFold DB",
       "AlphaMissense",
       "cancerhotspots.org",
       "Open Targets"
-    ]
+    ],
+    "enm_params": {
+      "gnm_cutoff": 10.0,
+      "anm_cutoff": 15.0,
+      "gamma": 1.0,
+      "n_modes_requested": 10,
+      "hinge_modes": 3
+    },
+    "weights": {
+      "recurrence": 0.3,
+      "pathogenicity": 0.35,
+      "druggability": 0.2,
+      "criticality": 0.15
+    }
   },
   "priority": [
     {
@@ -27,6 +46,7 @@
       "criticality": 0.627,
       "tumours": 155,
       "am_class": null,
+      "numbering_ok": true,
       "rationale": "recurrently mutated (155 tumours); predicted pathogenic (AlphaMissense); lines a druggable pocket; in a structurally critical site"
     },
     {
@@ -40,6 +60,7 @@
       "criticality": 0.021,
       "tumours": 144,
       "am_class": "LPath",
+      "numbering_ok": true,
       "rationale": "recurrently mutated (144 tumours); predicted pathogenic (Likely pathogenic); lines a druggable pocket"
     },
     {
@@ -53,6 +74,7 @@
       "criticality": 0.661,
       "tumours": 60,
       "am_class": "LPath",
+      "numbering_ok": true,
       "rationale": "mutated in 60 tumours; predicted pathogenic (Likely pathogenic); lines a druggable pocket; in a structurally critical site"
     },
     {
@@ -66,6 +88,7 @@
       "criticality": 0.67,
       "tumours": 59,
       "am_class": "LPath",
+      "numbering_ok": true,
       "rationale": "mutated in 59 tumours; predicted pathogenic (Likely pathogenic); lines a druggable pocket; in a structurally critical site"
     },
     {
@@ -79,6 +102,7 @@
       "criticality": 0.692,
       "tumours": 16,
       "am_class": "LPath",
+      "numbering_ok": true,
       "rationale": "mutated in 16 tumours; predicted pathogenic (Likely pathogenic); lines a druggable pocket; in a structurally critical site"
     },
     {
@@ -92,6 +116,7 @@
       "criticality": 0.692,
       "tumours": 19,
       "am_class": "LPath",
+      "numbering_ok": true,
       "rationale": "mutated in 19 tumours; predicted pathogenic (Likely pathogenic); lines a druggable pocket; in a structurally critical site"
     },
     {
@@ -105,6 +130,7 @@
       "criticality": 0.639,
       "tumours": 33,
       "am_class": "LPath",
+      "numbering_ok": true,
       "rationale": "mutated in 33 tumours; predicted pathogenic (Likely pathogenic); lines a druggable pocket; in a structurally critical site"
     },
     {
@@ -118,6 +144,7 @@
       "criticality": 0.539,
       "tumours": 16,
       "am_class": "LPath",
+      "numbering_ok": true,
       "rationale": "mutated in 16 tumours; predicted pathogenic (Likely pathogenic); lines a druggable pocket"
     },
     {
@@ -131,6 +158,7 @@
       "criticality": 0.473,
       "tumours": 8,
       "am_class": "LPath",
+      "numbering_ok": true,
       "rationale": "mutated in 8 tumours; predicted pathogenic (Likely pathogenic); lines a druggable pocket"
     },
     {
@@ -144,6 +172,7 @@
       "criticality": 0.57,
       "tumours": 5,
       "am_class": "LPath",
+      "numbering_ok": true,
       "rationale": "mutated in 5 tumours; predicted pathogenic (Likely pathogenic); lines a druggable pocket"
     },
     {
@@ -157,6 +186,7 @@
       "criticality": 0.539,
       "tumours": 9,
       "am_class": null,
+      "numbering_ok": true,
       "rationale": "mutated in 9 tumours; predicted pathogenic (AlphaMissense); lines a druggable pocket"
     },
     {
@@ -170,6 +200,7 @@
       "criticality": 0.398,
       "tumours": 33,
       "am_class": null,
+      "numbering_ok": true,
       "rationale": "mutated in 33 tumours; predicted pathogenic (AlphaMissense); lines a druggable pocket"
     },
     {
@@ -183,6 +214,7 @@
       "criticality": 0.424,
       "tumours": 15,
       "am_class": "LPath",
+      "numbering_ok": true,
       "rationale": "mutated in 15 tumours; predicted pathogenic (Likely pathogenic); lines a druggable pocket"
     },
     {
@@ -196,6 +228,7 @@
       "criticality": 0.0,
       "tumours": 21,
       "am_class": "LPath",
+      "numbering_ok": true,
       "rationale": "mutated in 21 tumours; predicted pathogenic (Likely pathogenic); lines a druggable pocket"
     },
     {
@@ -209,6 +242,7 @@
       "criticality": 0.693,
       "tumours": 16,
       "am_class": "LPath",
+      "numbering_ok": true,
       "rationale": "mutated in 16 tumours; predicted pathogenic (Likely pathogenic); lines a druggable pocket; in a structurally critical site"
     },
     {
@@ -222,6 +256,7 @@
       "criticality": 0.694,
       "tumours": 8,
       "am_class": "LPath",
+      "numbering_ok": true,
       "rationale": "mutated in 8 tumours; predicted pathogenic (Likely pathogenic); lines a druggable pocket; in a structurally critical site"
     },
     {
@@ -235,6 +270,7 @@
       "criticality": 0.587,
       "tumours": 10,
       "am_class": "LPath",
+      "numbering_ok": true,
       "rationale": "mutated in 10 tumours; predicted pathogenic (Likely pathogenic); lines a druggable pocket"
     },
     {
@@ -248,6 +284,7 @@
       "criticality": 0.689,
       "tumours": 7,
       "am_class": "LPath",
+      "numbering_ok": true,
       "rationale": "mutated in 7 tumours; predicted pathogenic (Likely pathogenic); lines a druggable pocket; in a structurally critical site"
     },
     {
@@ -261,6 +298,7 @@
       "criticality": 0.002,
       "tumours": 4,
       "am_class": "LPath",
+      "numbering_ok": true,
       "rationale": "mutated in 4 tumours; predicted pathogenic (Likely pathogenic); lines a druggable pocket"
     },
     {
@@ -274,6 +312,7 @@
       "criticality": 0.693,
       "tumours": 4,
       "am_class": "Amb",
+      "numbering_ok": true,
       "rationale": "mutated in 4 tumours; moderately damaging; lines a druggable pocket; in a structurally critical site"
     },
     {
@@ -287,6 +326,7 @@
       "criticality": 0.401,
       "tumours": 33,
       "am_class": "LPath",
+      "numbering_ok": true,
       "rationale": "mutated in 33 tumours; predicted pathogenic (Likely pathogenic)"
     },
     {
@@ -300,6 +340,7 @@
       "criticality": 0.0,
       "tumours": 3,
       "am_class": "LPath",
+      "numbering_ok": true,
       "rationale": "mutated in 3 tumours; predicted pathogenic (Likely pathogenic); lines a druggable pocket"
     },
     {
@@ -313,6 +354,7 @@
       "criticality": 0.686,
       "tumours": 3,
       "am_class": "LPath",
+      "numbering_ok": true,
       "rationale": "mutated in 3 tumours; predicted pathogenic (Likely pathogenic); in a structurally critical site"
     },
     {
@@ -326,6 +368,7 @@
       "criticality": 0.512,
       "tumours": 5,
       "am_class": "LBen",
+      "numbering_ok": true,
       "rationale": "mutated in 5 tumours; lines a druggable pocket"
     }
   ],
@@ -3967,10 +4010,26 @@
       0.2719
     ],
     "hinges": [
+      649,
       1076,
-      1164
+      1077,
+      1119,
+      1121,
+      1164,
+      1165,
+      1198,
+      1200,
+      1201
     ],
-    "n_modes": 10
+    "collectivity": 0.04,
+    "n_modes": 10,
+    "params": {
+      "gnm_cutoff": 10.0,
+      "anm_cutoff": 15.0,
+      "gamma": 1.0,
+      "n_modes_requested": 10,
+      "hinge_modes": 3
+    }
   },
   "pockets": [
     {
@@ -4701,23 +4760,23 @@
     "top_diseases": [
       {
         "name": "non-small cell lung carcinoma",
-        "score": 0.852
-      },
-      {
-        "name": "lung cancer",
-        "score": 0.766
+        "score": 0.853
       },
       {
         "name": "lung adenocarcinoma",
-        "score": 0.764
+        "score": 0.774
       },
       {
         "name": "cancer",
-        "score": 0.746
+        "score": 0.737
       },
       {
-        "name": "breast cancer",
-        "score": 0.678
+        "name": "head and neck squamous cell carcinoma",
+        "score": 0.725
+      },
+      {
+        "name": "lung cancer",
+        "score": 0.717
       }
     ]
   }

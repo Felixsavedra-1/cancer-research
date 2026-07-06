@@ -15,7 +15,8 @@ from . import dynamics as dyn
 from . import pathogenicity as patho
 from . import pockets as pock
 
-# Mirrored in cancer-explorer.html's renderPriority()/glossary text — update both.
+# Mirrored in cancer-explorer.html's glossary text (the GLOSS "Target Priority
+# Score" entry near its scoring comment) — update both.
 DEFAULT_WEIGHTS = {
     "recurrence": 0.30,
     "pathogenicity": 0.35,
@@ -24,6 +25,22 @@ DEFAULT_WEIGHTS = {
 }
 
 HINGE_WINDOW = 2
+
+# The [0,100] scale in ``score_residues`` only holds if the weights sum to 1, so
+# custom weights are validated rather than silently rescaling every score.
+_REQUIRED_AXES = frozenset(DEFAULT_WEIGHTS)
+
+
+def _validate_weights(weights: dict) -> dict:
+    missing = _REQUIRED_AXES - weights.keys()
+    if missing:
+        raise ValueError(f"weights missing axes: {sorted(missing)}")
+    total = sum(weights[k] for k in _REQUIRED_AXES)
+    if abs(total - 1.0) > 1e-6:
+        raise ValueError(
+            f"weights must sum to 1.0 for the 0-100 scale to hold, got {total:.4f}"
+        )
+    return weights
 
 
 def _most_common_variant(variants: dict) -> str | None:
@@ -83,7 +100,7 @@ def score_residues(
     descending score, each carrying its sub-scores, a ``numbering_ok`` flag, and a
     plain-English ``rationale``.
     """
-    weights = weights or DEFAULT_WEIGHTS
+    weights = _validate_weights(weights or DEFAULT_WEIGHTS)
     pathogenicity = pathogenicity or {}
     pockets = pockets or []
 

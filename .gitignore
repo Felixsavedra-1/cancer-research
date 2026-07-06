@@ -1,9 +1,14 @@
 .venv/
 .DS_Store
 *.csv
+# …but test fixtures (incl. a captured AlphaMissense CSV) must ship for the
+# network-free reproducibility test to run in CI.
+!tests/fixtures/**
 __pycache__/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+.coverage
 CLAUDE.md
 data/cache/
+benchmark/cache/

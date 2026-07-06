@@ -26,8 +26,22 @@ api = [
     "uvicorn[standard]~=0.29",
     "httpx~=0.27",
 ]
+# scripts/benchmark.py's optional data-fit weight comparison (degrades cleanly
+# without it); numeric metrics themselves are pure-NumPy in cancer_tool/metrics.py.
+benchmark = [
+    "scikit-learn>=1.3",
+]
 
 [tool.setuptools]
 # Only the core is packaged; the api service runs from the repo root (uvicorn
 # api.main:app), imported from the working directory.
 packages = ["cancer_tool"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+# pyflakes (F), pycodestyle (E), isort (I).
+select = ["E", "F", "I"]
+ignore = ["E501"]  # line length handled by the formatter, not the linter

@@ -5,15 +5,34 @@
   "length": 993,
   "provenance": {
     "tool_version": "0.3.0",
+    "git_commit": "7313dc4",
+    "packages": {
+      "prody": "2.6.1",
+      "numpy": "2.4.6",
+      "scipy": "1.17.1"
+    },
     "alphafold_model": "v6",
-    "fetched": "2026-06-20",
+    "fetched": "2026-07-05",
     "sources": [
       "UniProt",
       "AlphaFold DB",
       "AlphaMissense",
       "cancerhotspots.org",
       "Open Targets"
-    ]
+    ],
+    "enm_params": {
+      "gnm_cutoff": 10.0,
+      "anm_cutoff": 15.0,
+      "gamma": 1.0,
+      "n_modes_requested": 10,
+      "hinge_modes": 3
+    },
+    "weights": {
+      "recurrence": 0.3,
+      "pathogenicity": 0.35,
+      "druggability": 0.2,
+      "criticality": 0.15
+    }
   },
   "priority": [
     {
@@ -27,6 +46,7 @@
       "criticality": 0.269,
       "tumours": 27,
       "am_class": null,
+      "numbering_ok": true,
       "rationale": "recurrently mutated (27 tumours); predicted pathogenic (AlphaMissense); lines a druggable pocket"
     },
     {
@@ -40,6 +60,7 @@
       "criticality": 0.361,
       "tumours": 17,
       "am_class": "LPath",
+      "numbering_ok": true,
       "rationale": "recurrently mutated (17 tumours); predicted pathogenic (Likely pathogenic); lines a druggable pocket"
     }
   ],
@@ -3030,14 +3051,38 @@
       0.6146
     ],
     "hinges": [
+      26,
+      40,
+      41,
+      42,
+      57,
+      90,
+      91,
+      102,
+      117,
+      126,
+      147,
       172,
       186,
       195,
       233,
       241,
+      346,
+      538,
+      724,
+      743,
+      959,
       964
     ],
-    "n_modes": 10
+    "collectivity": 0.0071,
+    "n_modes": 10,
+    "params": {
+      "gnm_cutoff": 10.0,
+      "anm_cutoff": 15.0,
+      "gamma": 1.0,
+      "n_modes_requested": 10,
+      "hinge_modes": 3
+    }
   },
   "pockets": [
     {
@@ -3424,5 +3469,84 @@
       "source": "ligsite"
     }
   ],
-  "targets": null
+  "targets": {
+    "ensembl_id": "ENSG00000122025",
+    "symbol": "FLT3",
+    "tractability": [
+      {
+        "modality": "Small molecule",
+        "label": "Approved Drug"
+      },
+      {
+        "modality": "Small molecule",
+        "label": "Structure with Ligand"
+      },
+      {
+        "modality": "Small molecule",
+        "label": "High-Quality Ligand"
+      },
+      {
+        "modality": "Small molecule",
+        "label": "Med-Quality Pocket"
+      },
+      {
+        "modality": "Small molecule",
+        "label": "Druggable Family"
+      },
+      {
+        "modality": "Antibody",
+        "label": "Phase 1 Clinical"
+      },
+      {
+        "modality": "Antibody",
+        "label": "GO CC high conf"
+      },
+      {
+        "modality": "Antibody",
+        "label": "UniProt SigP or TMHMM"
+      },
+      {
+        "modality": "PROTAC",
+        "label": "Literature"
+      },
+      {
+        "modality": "PROTAC",
+        "label": "UniProt Ubiquitination"
+      },
+      {
+        "modality": "PROTAC",
+        "label": "Database Ubiquitination"
+      },
+      {
+        "modality": "PROTAC",
+        "label": "Small Molecule Binder"
+      },
+      {
+        "modality": "Other",
+        "label": "Advanced Clinical"
+      }
+    ],
+    "top_diseases": [
+      {
+        "name": "acute myeloid leukemia",
+        "score": 0.835
+      },
+      {
+        "name": "hepatocellular carcinoma",
+        "score": 0.667
+      },
+      {
+        "name": "gastrointestinal stromal tumor",
+        "score": 0.652
+      },
+      {
+        "name": "neoplasm",
+        "score": 0.647
+      },
+      {
+        "name": "renal cell carcinoma",
+        "score": 0.642
+      }
+    ]
+  }
 }

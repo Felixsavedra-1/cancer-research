@@ -1,0 +1,32 @@
+# Exact-pinned reproducibility lock — the scientific stack that produced the
+# committed data/*.json and benchmark/results.json. requirements.txt keeps
+# human-readable compatible ranges; this file is the reproducible truth.
+#
+# Regenerate after a deliberate bump:  pip freeze | grep -iE '^(streamlit|py3Dmol|requests|pandas|prody|numpy|scipy|pytest|fastapi|uvicorn|httpx|scikit-learn)=='
+#
+# The ProDy/NumPy/SciPy trio determines dynamics output, so these three in
+# particular are echoed into every payload's provenance.packages.
+
+# --- scientific core (determines rankings) ---
+prody==2.6.1
+numpy==2.4.6
+scipy==1.17.1
+
+# --- runtime / data ---
+requests==2.34.2
+pandas==3.0.3
+
+# --- Streamlit dev app ---
+streamlit==1.58.0
+py3Dmol==2.5.5
+
+# --- live-analysis API (optional extra) ---
+fastapi==0.139.0
+uvicorn==0.49.0
+httpx==0.28.1
+
+# --- benchmark weight-comparison (optional) ---
+scikit-learn==1.9.0
+
+# --- tests ---
+pytest==9.1.0

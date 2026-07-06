@@ -1,0 +1,38 @@
+{
+  "description": "Residue-level gold standard for benchmarking the Target Priority Score. Positives are well-established oncogenic driver residues (canonical UniProt numbering) drawn from OncoKB, the cancerhotspots.org publications (Chang et al. 2016, 2018), and Vogelstein et al. 2013. This is a HIGH-PRECISION, not high-recall, set: absence of a residue does not prove it is a passenger. The benchmark evaluates each gene over its RECURRENT hotspot residues only (the hard task: separate true drivers from residues that are merely recurrent), so positives = curated drivers among a gene's hotspots and negatives = the remaining hotspots.",
+  "references": [
+    {"name": "OncoKB", "doi": "10.1200/PO.17.00011"},
+    {"name": "cancerhotspots (Chang 2016)", "doi": "10.1038/nbt.3391"},
+    {"name": "cancerhotspots 3D (Chang 2018)", "doi": "10.1158/2159-8290.CD-17-0321"},
+    {"name": "Cancer genome landscapes (Vogelstein 2013)", "doi": "10.1126/science.1235122"}
+  ],
+  "genes": {
+    "TP53": {"role": "TSG", "positions": [175, 176, 179, 158, 213, 220, 238, 242, 245, 248, 249, 273, 282]},
+    "KRAS": {"role": "oncogene", "positions": [12, 13, 61, 117, 146]},
+    "NRAS": {"role": "oncogene", "positions": [12, 13, 61]},
+    "HRAS": {"role": "oncogene", "positions": [12, 13, 61]},
+    "BRAF": {"role": "oncogene", "positions": [466, 469, 596, 597, 600, 601]},
+    "EGFR": {"role": "oncogene", "positions": [719, 768, 790, 858, 861, 797]},
+    "PIK3CA": {"role": "oncogene", "positions": [345, 420, 453, 542, 545, 546, 1043, 1047]},
+    "IDH1": {"role": "oncogene", "positions": [132]},
+    "IDH2": {"role": "oncogene", "positions": [140, 172]},
+    "KIT": {"role": "oncogene", "positions": [557, 559, 560, 576, 816, 820, 822]},
+    "PTEN": {"role": "TSG", "positions": [124, 129, 130, 159, 173, 233]},
+    "FLT3": {"role": "oncogene", "positions": [835, 839, 842]},
+    "AKT1": {"role": "oncogene", "positions": [17]},
+    "CTNNB1": {"role": "oncogene", "positions": [32, 33, 34, 37, 41, 45]},
+    "FBXW7": {"role": "TSG", "positions": [465, 479, 505, 689]},
+    "ERBB2": {"role": "oncogene", "positions": [310, 755, 769, 777, 842]},
+    "GNAQ": {"role": "oncogene", "positions": [183, 209]},
+    "GNA11": {"role": "oncogene", "positions": [209]},
+    "ESR1": {"role": "oncogene", "positions": [537, 538]},
+    "SF3B1": {"role": "oncogene", "positions": [622, 625, 662, 666, 700]},
+    "MAP2K1": {"role": "oncogene", "positions": [56, 57, 124]},
+    "RAC1": {"role": "oncogene", "positions": [29]},
+    "SMAD4": {"role": "TSG", "positions": [361]},
+    "SPOP": {"role": "TSG", "positions": [102, 131, 133]},
+    "RHOA": {"role": "oncogene", "positions": [17, 42]},
+    "U2AF1": {"role": "oncogene", "positions": [34, 157]},
+    "POLE": {"role": "oncogene", "positions": [286, 411]}
+  }
+}

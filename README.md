@@ -18,6 +18,13 @@
 Type a gene (e.g. `TP53`, `KRAS`, `BRAF`) and the tool fetches its real **AlphaFold** structure, computes its intrinsic **folding dynamics**, scores every variant with DeepMind's **AlphaMissense**, finds **druggable pockets**, and fuses it all into a ranked shortlist of the **most actionable cancer-driver residues** — each with a plain-English rationale. No GPU required.
 
 > **Does the science hold up?** On TP53 the top three ranked residues come out **R273, R248, R175** — the textbook p53 drivers. KRAS tops at **G12**, BRAF at **V600**, EGFR at the **exon-19 deletion / L858 / T790** sites. The ranking rediscovers known biology from first principles.
+>
+> **And it's benchmarked, not just cherry-picked.** Against a curated gold standard of known
+> oncogenic residues across a **27-gene panel**, the score separates true drivers from merely
+> recurrent residues with **composite AUPRC ≈ 0.63** (~2.9× the random baseline) and
+> **precision@5 = 1.0**. Full harness, ablation, and an honest caveat (recurrence is a strong
+> baseline on a recurrence-defined benchmark) in [`benchmark/REPORT.md`](benchmark/REPORT.md)
+> — regenerate with `python scripts/benchmark.py`.
 
 ## Highlights
 
@@ -136,15 +143,19 @@ cancer_tool/
   pathogenicity.py     DeepMind AlphaMissense per-variant pathogenicity
   pockets.py           druggable-pocket detection (LIGSITE-style / fpocket)
   scoring.py           Target Priority Score (pure, unit-tested composite)
+  metrics.py           pure-NumPy ranking metrics (AUROC/AUPRC/P@k) for the benchmark
   targets.py           Open Targets tractability + disease links
   viewer.py            3D py3Dmol view (pLDDT / flexibility / priority colouring)
   pipeline.py          analyze_gene() — shared engine for precompute + the API
 api/main.py            FastAPI live-analysis service (/health, /analyze/{gene})
 Dockerfile             container image for the live-analysis API
 scripts/precompute.py  precompute engine -> data/{GENE}.json for the HTML
+scripts/benchmark.py   quantitative benchmark vs a gold standard -> benchmark/
 data/                  precomputed per-gene results (powers cancer-explorer.html)
-docs/METHODS.md        scoring formula, ENM parameters, and pocket caveats
-tests/                 network-free unit tests (scoring, dynamics, pathogenicity, ...)
+benchmark/             gold_standard.json + committed results.json / REPORT.md
+docs/METHODS.md        scoring formula, ENM parameters, pocket caveats, benchmark
+requirements.lock      exact-pinned scientific stack for reproducibility
+tests/                 network-free unit tests (scoring, dynamics, metrics, benchmark, ...)
 ```
 
 To refresh the standalone HTML's precomputed data:
@@ -164,7 +175,16 @@ pytest
 ```
 
 The suite needs no network — the scoring formula, ENM/NMA dynamics (on a synthetic
-fixture), and AlphaMissense parsing all run with no Streamlit/UI or HTTP dependency.
+fixture), AlphaMissense parsing, the ranking metrics, and a full-pipeline reproducibility
+check (KRAS → G12 replayed from captured API responses) all run with no Streamlit/UI or HTTP
+dependency. CI also lints with `ruff` and enforces a coverage floor across Python 3.11/3.12.
+
+To (re)run the quantitative benchmark against live data:
+
+```bash
+pip install ".[benchmark]"          # optional: enables the data-fit weight comparison
+python scripts/benchmark.py         # -> benchmark/results.json + REPORT.md
+```
 
 </details>
 
@@ -190,8 +210,11 @@ Honest scope, so the rankings aren't over-read:
 - **Confidence-aware, not confidence-proof.** Structural criticality is down-weighted by
   AlphaFold pLDDT, but low-confidence regions still carry more uncertainty than the score
   conveys.
-- **Not clinically validated.** The ranking rediscovers known driver biology, but the
-  composite weights are expert-set, not trained on outcome data.
+- **Not clinically validated.** The ranking rediscovers known driver biology and is
+  benchmarked against a curated gold standard (see [`benchmark/REPORT.md`](benchmark/REPORT.md)),
+  but the composite weights are expert-set, not trained on outcome data — and on a
+  recurrence-defined benchmark, recurrence alone is a strong baseline. Treat the score as a
+  research/education heuristic, meaningful *within* one protein, not a validated clinical metric.
 
 Full method — the scoring formula and weights, ENM/NMA parameters, and pocket-detection
 caveats — is written up in [`docs/METHODS.md`](docs/METHODS.md).

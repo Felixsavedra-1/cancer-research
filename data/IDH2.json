@@ -5,15 +5,34 @@
   "length": 452,
   "provenance": {
     "tool_version": "0.3.0",
+    "git_commit": "7313dc4",
+    "packages": {
+      "prody": "2.6.1",
+      "numpy": "2.4.6",
+      "scipy": "1.17.1"
+    },
     "alphafold_model": "v6",
-    "fetched": "2026-06-20",
+    "fetched": "2026-07-05",
     "sources": [
       "UniProt",
       "AlphaFold DB",
       "AlphaMissense",
       "cancerhotspots.org",
       "Open Targets"
-    ]
+    ],
+    "enm_params": {
+      "gnm_cutoff": 10.0,
+      "anm_cutoff": 15.0,
+      "gamma": 1.0,
+      "n_modes_requested": 10,
+      "hinge_modes": 3
+    },
+    "weights": {
+      "recurrence": 0.3,
+      "pathogenicity": 0.35,
+      "druggability": 0.2,
+      "criticality": 0.15
+    }
   },
   "priority": [
     {
@@ -27,6 +46,7 @@
       "criticality": 0.7,
       "tumours": 63,
       "am_class": "LPath",
+      "numbering_ok": true,
       "rationale": "recurrently mutated (63 tumours); predicted pathogenic (Likely pathogenic); lines a druggable pocket; in a structurally critical site"
     },
     {
@@ -40,6 +60,7 @@
       "criticality": 0.693,
       "tumours": 23,
       "am_class": "LPath",
+      "numbering_ok": true,
       "rationale": "mutated in 23 tumours; predicted pathogenic (Likely pathogenic); lines a druggable pocket; in a structurally critical site"
     }
   ],
@@ -1407,9 +1428,27 @@
       0.003
     ],
     "hinges": [
-      41
+      10,
+      12,
+      35,
+      41,
+      48,
+      71,
+      78,
+      175,
+      225,
+      258,
+      259
     ],
-    "n_modes": 10
+    "collectivity": 0.1088,
+    "n_modes": 10,
+    "params": {
+      "gnm_cutoff": 10.0,
+      "anm_cutoff": 15.0,
+      "gamma": 1.0,
+      "n_modes_requested": 10,
+      "hinge_modes": 3
+    }
   },
   "pockets": [
     {
@@ -1542,23 +1581,23 @@
     "top_diseases": [
       {
         "name": "D-2-hydroxyglutaric aciduria",
-        "score": 0.765
+        "score": 0.755
       },
       {
         "name": "glioma",
-        "score": 0.714
+        "score": 0.725
       },
       {
         "name": "acute myeloid leukemia",
-        "score": 0.68
+        "score": 0.69
+      },
+      {
+        "name": "astrocytoma (excluding glioblastoma)",
+        "score": 0.55
       },
       {
         "name": "2-hydroxyglutaric aciduria",
-        "score": 0.551
-      },
-      {
-        "name": "myeloid neoplasm",
-        "score": 0.488
+        "score": 0.541
       }
     ]
   }

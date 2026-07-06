@@ -23,7 +23,14 @@ def _fake_payload(gene: str) -> dict:
         "accession": "P00000",
         "name": "Fake protein",
         "length": 3,
-        "provenance": {},
+        "provenance": {
+            "tool_version": "test",
+            "git_commit": "abc1234",
+            "packages": {"prody": "0", "numpy": "0", "scipy": "0"},
+            "alphafold_model": "v6",
+            "fetched": "2026-01-01",
+            "weights": {"recurrence": 0.3, "pathogenicity": 0.35, "druggability": 0.2, "criticality": 0.15},
+        },
         "priority": [{"position": 1, "residue": "M1", "score": 42.0, "rationale": "test"}],
     }
 

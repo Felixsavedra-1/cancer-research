@@ -14,7 +14,13 @@ import requests  # noqa: E402
 
 from cancer_tool import pipeline  # noqa: E402
 
-FEATURED_GENES = ["TP53", "KRAS", "BRAF", "KIT", "FLT3", "IDH2", "PTEN", "EGFR"]
+# Aligned with the 27-gene benchmark panel (benchmark/gold_standard.json) so the
+# featured static set is exactly the set the Target Priority Score is validated on.
+FEATURED_GENES = [
+    "TP53", "KRAS", "BRAF", "KIT", "FLT3", "IDH2", "PTEN", "EGFR", "NRAS", "PIK3CA",
+    "HRAS", "IDH1", "AKT1", "CTNNB1", "FBXW7", "ERBB2", "GNAQ", "GNA11", "ESR1",
+    "SF3B1", "MAP2K1", "RAC1", "SMAD4", "SPOP", "RHOA", "U2AF1", "POLE",
+]
 TOP_N = pipeline.DEFAULT_TOP_N
 DATA_DIR = ROOT / "data"
 
@@ -63,6 +69,12 @@ def main(argv: list[str]) -> int:
         json.dumps({"genes": index, "generated": date.today().isoformat()}, indent=2)
     )
     print(f"\nWrote {len(index)} gene file(s) to {DATA_DIR.relative_to(ROOT)}/")
+
+    # Mirror data/ into the self-contained HTML so `open cancer-explorer.html`
+    # (file://, no server) gets the full precomputed experience.
+    import embed_data  # noqa: E402  (local script, imported lazily)
+
+    embed_data.main()
     return 0
 
 

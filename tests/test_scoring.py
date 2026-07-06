@@ -1,3 +1,5 @@
+import pytest
+
 from cancer_tool import scoring
 
 SEQUENCE = "MKTLR" "AAG" "AA"
@@ -66,6 +68,18 @@ def test_score_formula_matches_weights():
         + w["criticality"] * 0.63
     )
     assert abs(top["score"] - round(expected, 1)) < 0.2
+
+
+def test_weights_not_summing_to_one_are_rejected():
+    bad = {"recurrence": 0.5, "pathogenicity": 0.5, "druggability": 0.5, "criticality": 0.5}
+    with pytest.raises(ValueError, match="sum to 1.0"):
+        scoring.score_residues(_hotspots(), weights=bad)
+
+
+def test_weights_missing_an_axis_are_rejected():
+    bad = {"recurrence": 0.5, "pathogenicity": 0.5}
+    with pytest.raises(ValueError, match="missing axes"):
+        scoring.score_residues(_hotspots(), weights=bad)
 
 
 def test_rationale_is_explained():

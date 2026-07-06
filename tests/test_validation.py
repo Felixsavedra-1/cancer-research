@@ -1,3 +1,12 @@
+"""Artifact-integrity checks on the committed data/*.json.
+
+These assert the *shipped* precomputed files still contain the expected drivers
+and match the schema — they do NOT recompute the pipeline. The end-to-end
+"rediscovers known biology from first principles" claim is verified separately,
+network-free, in tests/test_pipeline_offline.py (which replays captured API
+responses through the real pipeline).
+"""
+
 import json
 from pathlib import Path
 

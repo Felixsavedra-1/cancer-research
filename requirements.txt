@@ -1,5 +1,8 @@
-# Pinned for reproducibility: the scientific stack (ProDy/NumPy/SciPy) determines the
-# dynamics output, so drift there silently changes rankings. Bump deliberately.
+# Human-readable compatible ranges for `pip install -r requirements.txt`. For an
+# EXACT reproducible environment (the stack that produced the committed data/ and
+# benchmark/ results), install requirements.lock instead — the scientific trio
+# ProDy/NumPy/SciPy determines dynamics output, so drift there silently changes
+# rankings, and each payload's provenance.packages records the versions used.
 streamlit~=1.32
 py3Dmol~=2.0
 requests~=2.31

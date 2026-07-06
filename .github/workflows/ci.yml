@@ -5,7 +5,7 @@ on:
   pull_request:
 
 jobs:
-  pytest:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -13,7 +13,25 @@ jobs:
         with:
           python-version: "3.11"
           cache: pip
+      - run: pip install ruff
+      - name: Ruff lint
+        run: ruff check cancer_tool/ scripts/ api/ tests/
+
+  pytest:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
       - name: Install dependencies
-        run: pip install -r requirements.txt
-      - name: Run tests
-        run: pytest -q
+        run: |
+          pip install -r requirements.txt
+          pip install pytest-cov
+      - name: Run tests (network-free) with coverage floor
+        run: pytest -q --cov=cancer_tool --cov-report=term-missing --cov-fail-under=75

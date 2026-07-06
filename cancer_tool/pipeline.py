@@ -9,7 +9,10 @@ share one schema. See docs/METHODS.md for the pipeline stages.
 from __future__ import annotations
 
 import re
+import subprocess
 from datetime import date
+from functools import lru_cache
+from importlib import metadata
 
 import requests
 
@@ -27,6 +30,37 @@ from cancer_tool import (
 
 DEFAULT_TOP_N = 30
 SOURCES = ["UniProt", "AlphaFold DB", "AlphaMissense", "cancerhotspots.org", "Open Targets"]
+
+# Packages that determine the numerical output — pinned in provenance so a
+# ranking can be traced to the exact scientific stack that produced it.
+_PROVENANCE_PACKAGES = ("prody", "numpy", "scipy")
+
+
+@lru_cache(maxsize=1)
+def _git_commit() -> str:
+    """Short hash of the code that generated a payload, or 'unknown' outside a repo."""
+    try:
+        out = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+            cwd=cancer_tool.__path__[0],
+        )
+        return out.stdout.strip() or "unknown"
+    except Exception:
+        return "unknown"
+
+
+@lru_cache(maxsize=1)
+def _package_versions() -> dict[str, str]:
+    versions = {}
+    for pkg in _PROVENANCE_PACKAGES:
+        try:
+            versions[pkg] = metadata.version(pkg)
+        except Exception:
+            versions[pkg] = "unknown"
+    return versions
 
 
 def analyze_gene(
@@ -58,7 +92,12 @@ def analyze_gene(
         dyn = dynamics.compute_dynamics(pdb)
     except dynamics.DynamicsError:
         dyn = None
-    pocket_list = pockets.detect_pockets(pdb)
+    # Like dynamics, pocket detection must degrade to nothing rather than break
+    # the ranking (missing ProDy/scipy or an unparseable structure raise here).
+    try:
+        pocket_list = pockets.detect_pockets(pdb)
+    except Exception:
+        pocket_list = []
     rows = scoring.score_residues(hotspots, pathos, dyn, pocket_list, protein["sequence"])
     context = targets.fetch_target_context(gene, session=session)
 
@@ -69,6 +108,8 @@ def analyze_gene(
         "length": protein["length"],
         "provenance": {
             "tool_version": cancer_tool.__version__,
+            "git_commit": _git_commit(),
+            "packages": _package_versions(),
             "alphafold_model": model_version,
             "fetched": date.today().isoformat(),
             "sources": SOURCES,
@@ -98,7 +139,11 @@ def analyze_gene(
 
 
 def validate_payload(payload: dict) -> None:
-    """Raise ``ValueError`` unless ``payload`` has the required analysis schema."""
+    """Raise ``ValueError`` unless ``payload`` has the required analysis schema.
+
+    Provenance is validated for content, not just presence, so a payload can
+    always be traced to the code + scientific-stack that produced it.
+    """
     for key in ("gene", "accession", "name", "length", "provenance", "priority"):
         if key not in payload:
             raise ValueError(f"{payload.get('gene', '?')}: missing '{key}'")
@@ -108,3 +153,15 @@ def validate_payload(payload: dict) -> None:
         missing = {"position", "residue", "score", "rationale"} - row.keys()
         if missing:
             raise ValueError(f"{payload['gene']}: priority row missing {missing}")
+
+    prov = payload["provenance"]
+    if not isinstance(prov, dict):
+        raise ValueError(f"{payload['gene']}: provenance must be an object")
+    prov_missing = {
+        "tool_version", "git_commit", "packages", "alphafold_model", "fetched", "weights"
+    } - prov.keys()
+    if prov_missing:
+        raise ValueError(f"{payload['gene']}: provenance missing {prov_missing}")
+    pkg_missing = set(_PROVENANCE_PACKAGES) - (prov.get("packages") or {}).keys()
+    if pkg_missing:
+        raise ValueError(f"{payload['gene']}: provenance.packages missing {pkg_missing}")
