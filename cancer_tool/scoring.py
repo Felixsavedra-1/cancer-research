@@ -7,18 +7,14 @@ Pure, network-free fusion of three axes into one explainable score:
 Weights are expert-set heuristics, not trained. recurrence is normalised per
 protein, so scores rank residues within a protein but do not compare across
 proteins. Structural criticality (ENM/NMA) is still computed and reported per
-residue for context, but it is NOT a weighted term: on the benchmark it did not
-separate drivers from recurrent passengers (AUROC ≈ 0.45) and including it
-lowered composite AUPRC (0.63 vs 0.69 without it), so dynamics stays as a
-visualisation/explanation layer rather than a ranking signal. See
-docs/METHODS.md and benchmark/REPORT.md.
+residue for context, but it is NOT a weighted term — on the benchmark it carried
+no ranking signal and slightly hurt precision, so dynamics stays a visualisation
+layer, not a ranking axis. See docs/METHODS.md and benchmark/REPORT.md.
 """
 
 from __future__ import annotations
 
-from . import dynamics as dyn
-from . import pathogenicity as patho
-from . import pockets as pock
+from . import dynamics as dyn, pathogenicity as patho, pockets as pock
 
 # Mirrored in cancer-explorer.html's glossary text (the GLOSS "Target Priority
 # Score" entry near its scoring comment) — update both.

@@ -34,7 +34,7 @@ PAGE = """<!doctype html><html><head><meta charset="utf-8"><style>
 </style></head><body>
 <div id="stage"><canvas id="c" width="512" height="320"></canvas></div>
 <script>
-  var GOLD='178,58,58', CRIM='178,58,58', GREY='140,140,147', BONE='#E8E3D6';
+  var CRIM='178,58,58', GREY='140,140,147', BONE='#E8E3D6';
 
   function grid(ctx,W,H){
     ctx.strokeStyle='rgba(38,38,43,0.85)'; ctx.lineWidth=1;
@@ -59,7 +59,7 @@ PAGE = """<!doctype html><html><head><meta charset="utf-8"><style>
     }
     var A=strandPts(0), B=strandPts(Math.PI), segs=[];
     for(var i=0;i<N;i++){
-      segs.push({k:'s',c:GOLD,p:A[i],q:A[i+1],z:(A[i].z+A[i+1].z)/2});
+      segs.push({k:'s',c:CRIM,p:A[i],q:A[i+1],z:(A[i].z+A[i+1].z)/2});
       segs.push({k:'s',c:GREY,p:B[i],q:B[i+1],z:(B[i].z+B[i+1].z)/2});
     }
     for(var r=0;r<=N;r+=7){ segs.push({k:'r',c:CRIM,p:A[r],q:B[r],z:(A[r].z+B[r].z)/2}); }
@@ -71,7 +71,7 @@ PAGE = """<!doctype html><html><head><meta charset="utf-8"><style>
       ctx.beginPath();ctx.moveTo(sg.p.x,sg.p.y);ctx.lineTo(sg.q.x,sg.q.y);ctx.stroke();
     }
     for(var j=0;j<=N;j+=7){
-      if(A[j].z>0.1){ dot(ctx,A[j].x,A[j].y,1.6+1.4*A[j].z,'rgba('+GOLD+','+(0.45+0.45*A[j].z).toFixed(3)+')'); }
+      if(A[j].z>0.1){ dot(ctx,A[j].x,A[j].y,1.6+1.4*A[j].z,'rgba('+CRIM+','+(0.45+0.45*A[j].z).toFixed(3)+')'); }
       if(B[j].z>0.1){ dot(ctx,B[j].x,B[j].y,1.3+1.1*B[j].z,BONE); }
     }
   }

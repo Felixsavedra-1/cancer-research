@@ -43,7 +43,7 @@ def roc_auc(labels, scores) -> float:
         j = i
         while j + 1 < n and sorted_s[j + 1] == sorted_s[i]:
             j += 1
-        avg_rank = (i + j) / 2.0 + 1.0  # 1-based average rank for the tie block
+        avg_rank = (i + j) / 2.0 + 1.0
         ranks[order[i : j + 1]] = avg_rank
         i = j + 1
     sum_pos_ranks = ranks[y == 1].sum()

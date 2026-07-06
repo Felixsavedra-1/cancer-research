@@ -103,10 +103,6 @@ def compute_dynamics(
     resnums = [int(n) for n in calphas.getResnums()]
     betas = [float(b) for b in calphas.getBetas()]
     plddt = [round(b, 1) for b in betas]
-    # AlphaFold stores per-residue pLDDT (0–100) in the B-factor column, but an
-    # experimental PDB stores crystallographic B-factors there instead. Any value
-    # outside [0, 100] means these are NOT pLDDT, so downstream scoring must not
-    # read them as confidence. A genuine AlphaFold model always passes this check.
     plddt_is_confidence = bool(betas) and all(0.0 <= b <= 100.0 for b in betas)
     n_modes = max(1, min(n_modes, n_atoms - 1))
 

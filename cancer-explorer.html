@@ -1413,11 +1413,11 @@ let _glossaryOpener = null;
 function openGlossary() {
   _glossaryOpener = document.activeElement;
   $("glossaryModal").classList.add("open");
-  $("glossaryX").focus();  // move focus into the dialog for keyboard users
+  $("glossaryX").focus();
 }
 function closeGlossary() {
   $("glossaryModal").classList.remove("open");
-  if (_glossaryOpener && _glossaryOpener.focus) _glossaryOpener.focus();  // restore focus
+  if (_glossaryOpener && _glossaryOpener.focus) _glossaryOpener.focus();
 }
 function glossaryIsOpen() { return $("glossaryModal").classList.contains("open"); }
 $("glossaryBtn").onclick = openGlossary;
@@ -1460,7 +1460,7 @@ function addGeneOptions(genes) {
   }
 }
 async function populateGeneList() {
-  addGeneOptions(EMBEDDED_GENES);            // instant, offline, file://-safe
+  addGeneOptions(EMBEDDED_GENES);
   try {
     const r = await fetch("data/index.json", { cache: "no-cache" });
     if (r.ok) addGeneOptions((await r.json()).genes);

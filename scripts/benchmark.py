@@ -48,9 +48,6 @@ K_VALUES = [5, 10, 20]
 ALL_ROWS_TOP_N = 100_000  # effectively "every scored hotspot residue"
 
 
-# ---------------------------------------------------------------------------
-# Data collection
-# ---------------------------------------------------------------------------
 def _payload_for(gene: str, session: requests.Session, refresh: bool) -> dict | None:
     cache = CACHE_DIR / f"{gene}.json"
     if cache.exists() and not refresh:
@@ -127,9 +124,6 @@ def collect(genes: dict, session: requests.Session, refresh: bool) -> tuple[list
     return rows, per_gene
 
 
-# ---------------------------------------------------------------------------
-# Evaluation
-# ---------------------------------------------------------------------------
 def _round(x: float | None) -> float | None:
     if x is None:
         return None
@@ -232,9 +226,6 @@ def _logistic_regression(rows: list[dict]) -> dict | None:
     }
 
 
-# ---------------------------------------------------------------------------
-# Reporting
-# ---------------------------------------------------------------------------
 def _fmt(x) -> str:
     return "—" if x is None else f"{x:.3f}" if isinstance(x, float) else str(x)
 
@@ -283,7 +274,6 @@ def write_report(results: dict) -> None:
             f"{_fmt(b['precision@5'])} | {_fmt(b['precision@10'])} | {_fmt(b['recall@10'])} |"
         )
 
-    # State the honest verdict, computed from the numbers rather than asserted.
     comp_auprc = ab["composite"]["auprc"]
     single = {a: ab[f"{a}_only"]["auprc"] for a in AXES}
     best_axis = max(single, key=lambda a: (single[a] if single[a] is not None else -1))
@@ -356,9 +346,6 @@ def write_report(results: dict) -> None:
     REPORT_PATH.write_text("\n".join(lines))
 
 
-# ---------------------------------------------------------------------------
-# Main
-# ---------------------------------------------------------------------------
 def main(argv: list[str]) -> int:
     refresh = "--refresh" in argv
     args = [a for a in argv[1:] if not a.startswith("--")]

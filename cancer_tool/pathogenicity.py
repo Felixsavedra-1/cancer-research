@@ -111,13 +111,9 @@ def variant_score(pathogenicity: dict, label: str) -> dict | None:
 def position_pathogenicity(pathogenicity: dict, position: int) -> float:
     """Positional pathogenicity used when the exact observed substitution is
     unavailable (numbering mismatch / no variant). Returns the MEAN AlphaMissense
-    score across the position's substitutions.
-
-    We tried the positional MAX ("is there a damaging change here"), but on the
-    benchmark it *regressed* discrimination: among already-recurrent hotspots the
-    max saturates near 1.0 for most functional positions and loses gradation,
-    dropping the pathogenicity axis AUROC from 0.66 to 0.57. Mean keeps the
-    signal, so mean stays. See benchmark/REPORT.md.
+    score across the position's substitutions — the positional MAX saturates near
+    1.0 for most functional residues and lost benchmark discrimination, so mean
+    stays. See benchmark/REPORT.md.
     """
     rec = pathogenicity.get("by_position", {}).get(position)
     return float(rec["mean"]) if rec else 0.0

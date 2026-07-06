@@ -45,3 +45,6 @@ target-version = "py311"
 # pyflakes (F), pycodestyle (E), isort (I).
 select = ["E", "F", "I"]
 ignore = ["E501"]  # line length handled by the formatter, not the linter
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
