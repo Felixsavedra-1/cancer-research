@@ -5,14 +5,14 @@
   "length": 393,
   "provenance": {
     "tool_version": "0.3.0",
-    "git_commit": "7313dc4",
+    "git_commit": "a8db9fa",
     "packages": {
       "prody": "2.6.1",
-      "numpy": "2.4.6",
+      "numpy": "1.26.4",
       "scipy": "1.17.1"
     },
     "alphafold_model": "v6",
-    "fetched": "2026-07-05",
+    "fetched": "2026-07-06",
     "sources": [
       "UniProt",
       "AlphaFold DB",
@@ -28,10 +28,9 @@
       "hinge_modes": 3
     },
     "weights": {
-      "recurrence": 0.3,
-      "pathogenicity": 0.35,
-      "druggability": 0.2,
-      "criticality": 0.15
+      "recurrence": 0.3529,
+      "pathogenicity": 0.4118,
+      "druggability": 0.2353
     }
   },
   "priority": [
@@ -39,7 +38,7 @@
       "position": 57,
       "residue": "K57",
       "wt": "K",
-      "score": 95.2,
+      "score": 100.0,
       "recurrence": 1.0,
       "pathogenicity": 0.999,
       "druggability": 1.0,
@@ -53,7 +52,7 @@
       "position": 124,
       "residue": "P124",
       "wt": "P",
-      "score": 84.6,
+      "score": 82.0,
       "recurrence": 0.862,
       "pathogenicity": 0.968,
       "druggability": 0.497,
@@ -67,7 +66,7 @@
       "position": 128,
       "residue": "G128",
       "wt": "G",
-      "score": 80.2,
+      "score": 76.8,
       "recurrence": 0.345,
       "pathogenicity": 0.999,
       "druggability": 1.0,
@@ -78,24 +77,10 @@
       "rationale": "mutated in 10 tumours; predicted pathogenic (Likely pathogenic); lines a druggable pocket; in a structurally critical site"
     },
     {
-      "position": 130,
-      "residue": "Y130",
-      "wt": "Y",
-      "score": 73.9,
-      "recurrence": 0.172,
-      "pathogenicity": 0.969,
-      "druggability": 1.0,
-      "criticality": 0.986,
-      "tumours": 5,
-      "am_class": "LPath",
-      "numbering_ok": true,
-      "rationale": "mutated in 5 tumours; predicted pathogenic (Likely pathogenic); lines a druggable pocket; in a structurally critical site"
-    },
-    {
       "position": 99,
       "residue": "99-107",
       "wt": "I",
-      "score": 73.1,
+      "score": 74.0,
       "recurrence": 0.276,
       "pathogenicity": 0.99,
       "druggability": 1.0,
@@ -109,7 +94,7 @@
       "position": 203,
       "residue": "E203",
       "wt": "E",
-      "score": 71.7,
+      "score": 72.1,
       "recurrence": 0.552,
       "pathogenicity": 0.994,
       "druggability": 0.497,
@@ -120,24 +105,24 @@
       "rationale": "recurrently mutated (16 tumours); predicted pathogenic (Likely pathogenic); lines a druggable pocket; in a structurally critical site"
     },
     {
-      "position": 122,
-      "residue": "N122",
-      "wt": "N",
-      "score": 68.8,
-      "recurrence": 0.103,
-      "pathogenicity": 0.881,
+      "position": 130,
+      "residue": "Y130",
+      "wt": "Y",
+      "score": 69.5,
+      "recurrence": 0.172,
+      "pathogenicity": 0.969,
       "druggability": 1.0,
-      "criticality": 0.991,
-      "tumours": 3,
+      "criticality": 0.986,
+      "tumours": 5,
       "am_class": "LPath",
       "numbering_ok": true,
-      "rationale": "mutated in 3 tumours; predicted pathogenic (Likely pathogenic); lines a druggable pocket; in a structurally critical site"
+      "rationale": "mutated in 5 tumours; predicted pathogenic (Likely pathogenic); lines a druggable pocket; in a structurally critical site"
     },
     {
       "position": 53,
       "residue": "F53",
       "wt": "F",
-      "score": 68.1,
+      "score": 68.0,
       "recurrence": 0.586,
       "pathogenicity": 1.0,
       "druggability": 0.263,
@@ -148,24 +133,24 @@
       "rationale": "recurrently mutated (17 tumours); predicted pathogenic (Likely pathogenic); lines a druggable pocket; in a structurally critical site"
     },
     {
-      "position": 121,
-      "residue": "C121",
-      "wt": "C",
-      "score": 56.1,
-      "recurrence": 0.207,
-      "pathogenicity": 0.997,
-      "druggability": 0.0,
-      "criticality": 0.997,
-      "tumours": 6,
+      "position": 122,
+      "residue": "N122",
+      "wt": "N",
+      "score": 63.4,
+      "recurrence": 0.103,
+      "pathogenicity": 0.881,
+      "druggability": 1.0,
+      "criticality": 0.991,
+      "tumours": 3,
       "am_class": "LPath",
       "numbering_ok": true,
-      "rationale": "mutated in 6 tumours; predicted pathogenic (Likely pathogenic); in a structurally critical site"
+      "rationale": "mutated in 3 tumours; predicted pathogenic (Likely pathogenic); lines a druggable pocket; in a structurally critical site"
     },
     {
       "position": 56,
       "residue": "Q56",
       "wt": "Q",
-      "score": 55.4,
+      "score": 53.2,
       "recurrence": 0.172,
       "pathogenicity": 0.993,
       "druggability": 0.263,
@@ -176,10 +161,24 @@
       "rationale": "mutated in 5 tumours; predicted pathogenic (Likely pathogenic); lines a druggable pocket; in a structurally critical site"
     },
     {
+      "position": 121,
+      "residue": "C121",
+      "wt": "C",
+      "score": 48.4,
+      "recurrence": 0.207,
+      "pathogenicity": 0.997,
+      "druggability": 0.0,
+      "criticality": 0.997,
+      "tumours": 6,
+      "am_class": "LPath",
+      "numbering_ok": true,
+      "rationale": "mutated in 6 tumours; predicted pathogenic (Likely pathogenic); in a structurally critical site"
+    },
+    {
       "position": 386,
       "residue": "T386",
       "wt": "T",
-      "score": 27.8,
+      "score": 31.3,
       "recurrence": 0.103,
       "pathogenicity": 0.672,
       "druggability": 0.0,

@@ -1,12 +1,17 @@
 """Target Priority Score — the composite target-discovery ranking.
 
-Pure, network-free fusion of four axes into one explainable score:
+Pure, network-free fusion of three axes into one explainable score:
 
-    0.30·recurrence + 0.35·pathogenicity + 0.20·druggability + 0.15·criticality
+    0.353·recurrence + 0.412·pathogenicity + 0.235·druggability
 
-Weights are expert-set heuristics, not trained. recurrence and criticality are
-normalised per protein, so scores rank residues within a protein but do not
-compare across proteins. See docs/METHODS.md.
+Weights are expert-set heuristics, not trained. recurrence is normalised per
+protein, so scores rank residues within a protein but do not compare across
+proteins. Structural criticality (ENM/NMA) is still computed and reported per
+residue for context, but it is NOT a weighted term: on the benchmark it did not
+separate drivers from recurrent passengers (AUROC ≈ 0.45) and including it
+lowered composite AUPRC (0.63 vs 0.69 without it), so dynamics stays as a
+visualisation/explanation layer rather than a ranking signal. See
+docs/METHODS.md and benchmark/REPORT.md.
 """
 
 from __future__ import annotations
@@ -18,10 +23,9 @@ from . import pockets as pock
 # Mirrored in cancer-explorer.html's glossary text (the GLOSS "Target Priority
 # Score" entry near its scoring comment) — update both.
 DEFAULT_WEIGHTS = {
-    "recurrence": 0.30,
-    "pathogenicity": 0.35,
-    "druggability": 0.20,
-    "criticality": 0.15,
+    "recurrence": 0.3529,
+    "pathogenicity": 0.4118,
+    "druggability": 0.2353,
 }
 
 HINGE_WINDOW = 2
@@ -106,7 +110,15 @@ def score_residues(
 
     rigidity = dyn.rigidity_by_position(dynamics) if dynamics else {}
     hinges = set(dynamics.get("hinges", [])) if dynamics else set()
-    plddt = dyn.plddt_by_position(dynamics) if dynamics else {}
+    # Only treat the B-factor column as pLDDT confidence when dynamics confirms it
+    # is (AlphaFold model). For an experimental structure the values are B-factors,
+    # so we drop them and _confidence falls back to a neutral 1.0. Older precomputed
+    # data lacks the flag and is AlphaFold-derived, so default to True.
+    plddt = (
+        dyn.plddt_by_position(dynamics)
+        if dynamics and dynamics.get("plddt_is_confidence", True)
+        else {}
+    )
 
     max_count = max((h.get("count", 0) for h in hotspots), default=0)
 

@@ -18,7 +18,7 @@
     {
       "gene": "KIT",
       "name": "Mast/stem cell growth factor receptor Kit",
-      "top": "K642"
+      "top": "D816"
     },
     {
       "gene": "FLT3",
@@ -136,5 +136,5 @@
       "top": "P286"
     }
   ],
-  "generated": "2026-07-05"
+  "generated": "2026-07-06"
 }

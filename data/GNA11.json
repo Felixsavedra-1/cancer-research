@@ -5,14 +5,14 @@
   "length": 359,
   "provenance": {
     "tool_version": "0.3.0",
-    "git_commit": "7313dc4",
+    "git_commit": "a8db9fa",
     "packages": {
       "prody": "2.6.1",
-      "numpy": "2.4.6",
+      "numpy": "1.26.4",
       "scipy": "1.17.1"
     },
     "alphafold_model": "v6",
-    "fetched": "2026-07-05",
+    "fetched": "2026-07-06",
     "sources": [
       "UniProt",
       "AlphaFold DB",
@@ -28,10 +28,9 @@
       "hinge_modes": 3
     },
     "weights": {
-      "recurrence": 0.3,
-      "pathogenicity": 0.35,
-      "druggability": 0.2,
-      "criticality": 0.15
+      "recurrence": 0.3529,
+      "pathogenicity": 0.4118,
+      "druggability": 0.2353
     }
   },
   "priority": [
@@ -39,7 +38,7 @@
       "position": 209,
       "residue": "Q209",
       "wt": "Q",
-      "score": 95.1,
+      "score": 99.7,
       "recurrence": 1.0,
       "pathogenicity": 0.993,
       "druggability": 1.0,
@@ -53,7 +52,7 @@
       "position": 183,
       "residue": "R183",
       "wt": "R",
-      "score": 73.3,
+      "score": 68.7,
       "recurrence": 0.119,
       "pathogenicity": 0.994,
       "druggability": 1.0,

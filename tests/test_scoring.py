@@ -61,17 +61,18 @@ def test_score_formula_matches_weights():
     )
     top = rows[0]
     w = scoring.DEFAULT_WEIGHTS
+    # criticality is computed and reported but is NOT a weighted term.
     expected = 100 * (
         w["recurrence"] * 1.0
         + w["pathogenicity"] * 0.95
         + w["druggability"] * 0.8
-        + w["criticality"] * 0.63
     )
     assert abs(top["score"] - round(expected, 1)) < 0.2
+    assert "criticality" not in scoring.DEFAULT_WEIGHTS
 
 
 def test_weights_not_summing_to_one_are_rejected():
-    bad = {"recurrence": 0.5, "pathogenicity": 0.5, "druggability": 0.5, "criticality": 0.5}
+    bad = {"recurrence": 0.5, "pathogenicity": 0.5, "druggability": 0.5}
     with pytest.raises(ValueError, match="sum to 1.0"):
         scoring.score_residues(_hotspots(), weights=bad)
 
@@ -111,16 +112,31 @@ def test_low_confidence_suppresses_criticality():
     assert pos5["criticality"] == 0.0
 
 
+def test_experimental_bfactors_not_read_as_confidence():
+    # Same low B-factors, but flagged as an experimental structure (not pLDDT).
+    # Scoring must NOT treat them as low confidence, so criticality is undiscounted.
+    dynamics = {**_dynamics(), "plddt": [30.0, 95.0], "plddt_is_confidence": False}
+    rows = scoring.score_residues(
+        _hotspots(), _pathogenicity(), dynamics, _pockets(), SEQUENCE
+    )
+    pos5 = next(r for r in rows if r["position"] == 5)
+    assert pos5["criticality"] > 0.0
+
+
 def test_weights_perturbation_keeps_top_driver():
     top = scoring.score_residues(
         _hotspots(), _pathogenicity(), _dynamics(), _pockets(), SEQUENCE
     )[0]["position"]
-    factors = [0.75, 1.25, 0.75, 1.25]
-    for shift in range(4):
-        weights = {
-            k: v * factors[(i + shift) % 4]
+    n = len(scoring.DEFAULT_WEIGHTS)
+    factors = [0.75, 1.25, 0.9]
+    for shift in range(n):
+        perturbed = {
+            k: v * factors[(i + shift) % len(factors)]
             for i, (k, v) in enumerate(scoring.DEFAULT_WEIGHTS.items())
         }
+        # renormalise so the [0,100] scale (weights sum to 1) still holds
+        total = sum(perturbed.values())
+        weights = {k: v / total for k, v in perturbed.items()}
         rows = scoring.score_residues(
             _hotspots(), _pathogenicity(), _dynamics(), _pockets(), SEQUENCE, weights=weights
         )
@@ -150,7 +166,7 @@ def test_numbering_ok_when_wild_type_agrees():
 
 
 def test_custom_weights_override():
-    weights = {"recurrence": 1.0, "pathogenicity": 0.0, "druggability": 0.0, "criticality": 0.0}
+    weights = {"recurrence": 1.0, "pathogenicity": 0.0, "druggability": 0.0}
     rows = scoring.score_residues(
         _hotspots(), _pathogenicity(), _dynamics(), _pockets(), SEQUENCE, weights=weights
     )

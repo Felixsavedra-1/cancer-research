@@ -5,14 +5,14 @@
   "length": 374,
   "provenance": {
     "tool_version": "0.3.0",
-    "git_commit": "7313dc4",
+    "git_commit": "a8db9fa",
     "packages": {
       "prody": "2.6.1",
-      "numpy": "2.4.6",
+      "numpy": "1.26.4",
       "scipy": "1.17.1"
     },
     "alphafold_model": "v6",
-    "fetched": "2026-07-05",
+    "fetched": "2026-07-06",
     "sources": [
       "UniProt",
       "AlphaFold DB",
@@ -28,10 +28,9 @@
       "hinge_modes": 3
     },
     "weights": {
-      "recurrence": 0.3,
-      "pathogenicity": 0.35,
-      "druggability": 0.2,
-      "criticality": 0.15
+      "recurrence": 0.3529,
+      "pathogenicity": 0.4118,
+      "druggability": 0.2353
     }
   },
   "priority": [
@@ -39,7 +38,7 @@
       "position": 133,
       "residue": "F133",
       "wt": "F",
-      "score": 74.8,
+      "score": 76.5,
       "recurrence": 1.0,
       "pathogenicity": 1.0,
       "druggability": 0.0,
@@ -53,7 +52,7 @@
       "position": 102,
       "residue": "F102",
       "wt": "F",
-      "score": 62.7,
+      "score": 62.2,
       "recurrence": 0.358,
       "pathogenicity": 0.989,
       "druggability": 0.374,
@@ -67,7 +66,7 @@
       "position": 131,
       "residue": "W131",
       "wt": "W",
-      "score": 54.7,
+      "score": 52.9,
       "recurrence": 0.343,
       "pathogenicity": 0.99,
       "druggability": 0.0,
@@ -81,7 +80,7 @@
       "position": 87,
       "residue": "Y87",
       "wt": "Y",
-      "score": 50.6,
+      "score": 48.1,
       "recurrence": 0.209,
       "pathogenicity": 0.989,
       "druggability": 0.0,
@@ -95,7 +94,7 @@
       "position": 125,
       "residue": "F125",
       "wt": "F",
-      "score": 47.4,
+      "score": 44.3,
       "recurrence": 0.09,
       "pathogenicity": 1.0,
       "druggability": 0.0,
@@ -109,7 +108,7 @@
       "position": 129,
       "residue": "K129",
       "wt": "K",
-      "score": 45.3,
+      "score": 41.9,
       "recurrence": 0.045,
       "pathogenicity": 0.98,
       "druggability": 0.0,
@@ -123,7 +122,7 @@
       "position": 117,
       "residue": "M117",
       "wt": "M",
-      "score": 36.5,
+      "score": 31.4,
       "recurrence": 0.104,
       "pathogenicity": 0.673,
       "druggability": 0.0,

@@ -5,7 +5,7 @@ import numpy as np
 from cancer_tool import dynamics
 
 
-def _alpha_helix_pdb(n: int = 16) -> str:
+def _alpha_helix_pdb(n: int = 16, bfactor: float = 50.0) -> str:
     radius, rise, turn = 2.3, 1.5, math.radians(100.0)
     lines = []
     for i in range(n):
@@ -14,7 +14,7 @@ def _alpha_helix_pdb(n: int = 16) -> str:
         z = i * rise
         lines.append(
             f"ATOM  {i + 1:>5}  CA  ALA A{i + 1:>4}    "
-            f"{x:8.3f}{y:8.3f}{z:8.3f}  1.00 50.00           C"
+            f"{x:8.3f}{y:8.3f}{z:8.3f}  1.00{bfactor:6.2f}           C"
         )
     lines.append("END")
     return "\n".join(lines)
@@ -84,3 +84,16 @@ def test_plddt_is_read_from_b_factors():
     assert all(b == 50.0 for b in result["plddt"])
     plddt_map = dynamics.plddt_by_position(result)
     assert set(plddt_map) == set(result["residue_numbers"])
+
+
+def test_plddt_is_confidence_flag_for_alphafold_range():
+    # AlphaFold pLDDT lives in [0, 100] → treated as confidence.
+    result = dynamics.compute_dynamics(_alpha_helix_pdb(12, bfactor=80.0))
+    assert result["plddt_is_confidence"] is True
+
+
+def test_plddt_is_confidence_false_for_experimental_bfactors():
+    # A real crystal structure stores B-factors that can exceed 100 → NOT pLDDT,
+    # so the flag must be False and scoring must not read them as confidence.
+    result = dynamics.compute_dynamics(_alpha_helix_pdb(12, bfactor=120.0))
+    assert result["plddt_is_confidence"] is False

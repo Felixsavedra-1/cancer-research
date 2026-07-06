@@ -5,14 +5,14 @@
   "length": 192,
   "provenance": {
     "tool_version": "0.3.0",
-    "git_commit": "7313dc4",
+    "git_commit": "a8db9fa",
     "packages": {
       "prody": "2.6.1",
-      "numpy": "2.4.6",
+      "numpy": "1.26.4",
       "scipy": "1.17.1"
     },
     "alphafold_model": "v6",
-    "fetched": "2026-07-05",
+    "fetched": "2026-07-06",
     "sources": [
       "UniProt",
       "AlphaFold DB",
@@ -28,10 +28,9 @@
       "hinge_modes": 3
     },
     "weights": {
-      "recurrence": 0.3,
-      "pathogenicity": 0.35,
-      "druggability": 0.2,
-      "criticality": 0.15
+      "recurrence": 0.3529,
+      "pathogenicity": 0.4118,
+      "druggability": 0.2353
     }
   },
   "priority": [
@@ -39,7 +38,7 @@
       "position": 29,
       "residue": "P29",
       "wt": "P",
-      "score": 83.0,
+      "score": 81.8,
       "recurrence": 1.0,
       "pathogenicity": 0.997,
       "druggability": 0.231,
@@ -53,7 +52,7 @@
       "position": 18,
       "residue": "C18",
       "wt": "C",
-      "score": 56.8,
+      "score": 49.3,
       "recurrence": 0.075,
       "pathogenicity": 0.999,
       "druggability": 0.231,
@@ -67,7 +66,7 @@
       "position": 12,
       "residue": "G12",
       "wt": "G",
-      "score": 53.3,
+      "score": 45.1,
       "recurrence": 0.113,
       "pathogenicity": 0.999,
       "druggability": 0.0,
@@ -81,7 +80,7 @@
       "position": 111,
       "residue": "N111",
       "wt": "I",
-      "score": 52.8,
+      "score": 44.5,
       "recurrence": 0.094,
       "pathogenicity": 1.0,
       "druggability": 0.0,
@@ -95,7 +94,7 @@
       "position": 34,
       "residue": "P34",
       "wt": "P",
-      "score": 47.5,
+      "score": 44.5,
       "recurrence": 0.094,
       "pathogenicity": 0.999,
       "druggability": 0.0,
@@ -109,7 +108,7 @@
       "position": 61,
       "residue": "Q61",
       "wt": "Q",
-      "score": 47.4,
+      "score": 43.6,
       "recurrence": 0.075,
       "pathogenicity": 0.995,
       "druggability": 0.0,
@@ -123,7 +122,7 @@
       "position": 178,
       "residue": "A178",
       "wt": "C",
-      "score": 35.6,
+      "score": 25.6,
       "recurrence": 0.226,
       "pathogenicity": 0.428,
       "druggability": 0.0,
@@ -137,7 +136,7 @@
       "position": 135,
       "residue": "K135",
       "wt": "T",
-      "score": 31.4,
+      "score": 24.9,
       "recurrence": 0.038,
       "pathogenicity": 0.572,
       "druggability": 0.0,

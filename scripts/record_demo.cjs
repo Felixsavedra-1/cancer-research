@@ -69,6 +69,11 @@ const H = 860;
     console.error('  (content did not fully populate in time — continuing)');
   }
 
+  // Late-populating cards (residue spotlight, cancer types, hotspots) keep growing the page
+  // after the content-ready check, so let the layout settle before we measure/scroll — else
+  // the scroll ends short of the now-taller bottom.
+  await page.waitForTimeout(500); // layout settle
+
   // Pin to the very top and disable native smooth-scroll so our own ease drives the motion,
   // then hold briefly so the GIF has a clean top anchor frame.
   await page.evaluate(() => {
@@ -83,13 +88,15 @@ const H = 860;
 
   await page.evaluate(async () => {
     const el = window.pickScroller();
-    const max = el.scrollHeight - el.clientHeight;
     const duration = 5200;
     const ease = (t) => 0.5 - 0.5 * Math.cos(Math.PI * t);
     await new Promise((resolve) => {
       const start = performance.now();
       function frame(now) {
         const t = Math.min(1, (now - start) / duration);
+        // Recompute the scroll extent every frame: async cards can still grow the page
+        // mid-scroll, and a value captured once would stop short of the true bottom.
+        const max = el.scrollHeight - el.clientHeight;
         el.scrollTop = max * ease(t);
         if (t < 1) requestAnimationFrame(frame);
         else resolve();

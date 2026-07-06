@@ -261,7 +261,7 @@ def write_report(results: dict) -> None:
         f"(prevalence **{_fmt(ev['prevalence'])}** — the AUPRC a random ranker would get)\n"
     )
 
-    lines.append("\n## Headline — does fusing four axes beat any single axis?\n")
+    lines.append("\n## Headline — does fusing the axes beat any single axis?\n")
     lines.append("| Ranking | AUROC | AUPRC | P@5 | P@10 | R@10 |")
     lines.append("|---|---|---|---|---|---|")
     order = ["composite"] + [f"{a}_only" for a in AXES] + [f"drop_{a}" for a in AXES]
@@ -297,7 +297,7 @@ def write_report(results: dict) -> None:
     if single[best_axis] is not None and single[best_axis] > (comp_auprc or 0):
         lines.append(
             f"- **Honest caveat:** on this panel, *{best_axis} alone* scores higher on AUPRC "
-            f"(**{_fmt(single[best_axis])}**) than the four-axis composite. This benchmark's "
+            f"(**{_fmt(single[best_axis])}**) than the composite. This benchmark's "
             "universe is *already-recurrent* hotspots, and the OncoKB/COSMIC positives were "
             "themselves partly identified by recurrence, so recurrence has a built-in edge here "
             "that would not transfer to residues where recurrence is silent. The composite's "
@@ -323,7 +323,7 @@ def write_report(results: dict) -> None:
         lw = ev["learned_weights"]
         lines.append("\n## Are the expert weights reasonable? (data-fit comparison)\n")
         lines.append(
-            f"A logistic model fit on the four axes (5-fold CV) reaches AUPRC "
+            f"A logistic model fit on the axes (5-fold CV) reaches AUPRC "
             f"**{_fmt(lw['cv_auprc'])}** vs the expert-weighted composite's "
             f"**{_fmt(ab['composite']['auprc'])}**. Data-implied positive weights:\n"
         )

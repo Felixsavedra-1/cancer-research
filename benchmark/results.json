@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-05",
+  "generated": "2026-07-06",
   "tool_version": "0.3.0",
   "gold_standard": {
     "references": [
@@ -30,14 +30,14 @@
     "prevalence": 0.2205,
     "ablation": {
       "composite": {
-        "auroc": 0.7912,
-        "auprc": 0.6336,
-        "precision@5": 1.0,
+        "auroc": 0.8282,
+        "auprc": 0.6833,
+        "precision@5": 0.8,
         "precision@10": 0.9,
-        "precision@20": 0.95,
-        "recall@5": 0.0515,
+        "precision@20": 0.9,
+        "recall@5": 0.0412,
         "recall@10": 0.0928,
-        "recall@20": 0.1959
+        "recall@20": 0.1856
       },
       "recurrence_only": {
         "auroc": 0.8737,
@@ -80,33 +80,33 @@
         "recall@20": 0.0412
       },
       "drop_recurrence": {
-        "auroc": 0.6369,
-        "auprc": 0.3011,
-        "precision@5": 0.2,
-        "precision@10": 0.2,
-        "precision@20": 0.4,
-        "recall@5": 0.0103,
-        "recall@10": 0.0206,
-        "recall@20": 0.0825
+        "auroc": 0.6836,
+        "auprc": 0.3379,
+        "precision@5": 0.6,
+        "precision@10": 0.6,
+        "precision@20": 0.6,
+        "recall@5": 0.0309,
+        "recall@10": 0.0619,
+        "recall@20": 0.1237
       },
       "drop_pathogenicity": {
-        "auroc": 0.7817,
-        "auprc": 0.621,
-        "precision@5": 1.0,
-        "precision@10": 1.0,
+        "auroc": 0.8259,
+        "auprc": 0.6414,
+        "precision@5": 0.8,
+        "precision@10": 0.8,
         "precision@20": 0.9,
-        "recall@5": 0.0515,
-        "recall@10": 0.1031,
+        "recall@5": 0.0412,
+        "recall@10": 0.0825,
         "recall@20": 0.1856
       },
       "drop_druggability": {
-        "auroc": 0.7977,
-        "auprc": 0.6852,
+        "auroc": 0.8735,
+        "auprc": 0.7575,
         "precision@5": 1.0,
-        "precision@10": 1.0,
+        "precision@10": 0.9,
         "precision@20": 0.95,
         "recall@5": 0.0515,
-        "recall@10": 0.1031,
+        "recall@10": 0.0928,
         "recall@20": 0.1959
       },
       "drop_criticality": {
@@ -121,33 +121,10 @@
       }
     },
     "separation": {
-      "positive_mean_score": 68.1175,
-      "negative_mean_score": 49.6248,
-      "positive_median_score": 67.2,
-      "negative_median_score": 49.3
-    },
-    "learned_weights": {
-      "cv_auprc": 0.7329,
-      "cv_auroc": 0.8738,
-      "coefficients": {
-        "recurrence": 4.8486,
-        "pathogenicity": 1.9704,
-        "druggability": 0.5024,
-        "criticality": -1.3593
-      },
-      "normalized_positive_weights": {
-        "recurrence": 0.6623,
-        "pathogenicity": 0.2691,
-        "druggability": 0.0686,
-        "criticality": 0.0
-      },
-      "expert_weights": {
-        "recurrence": 0.3,
-        "pathogenicity": 0.35,
-        "druggability": 0.2,
-        "criticality": 0.15
-      },
-      "note": "5-fold cross-validated. Weights fit on this panel are reported for comparison only; the shipped default stays the expert set."
+      "positive_mean_score": 70.367,
+      "negative_mean_score": 47.3102,
+      "positive_median_score": 71.2,
+      "negative_median_score": 45.1
     }
   },
   "per_gene": [
@@ -156,8 +133,8 @@
       "status": "ok",
       "n_hotspots": 120,
       "n_positives": 13,
-      "auroc": 0.8591,
-      "auprc": 0.5949,
+      "auroc": 0.8566,
+      "auprc": 0.5928,
       "found_positives": [
         "C176",
         "C238",
@@ -181,8 +158,8 @@
       "status": "ok",
       "n_hotspots": 12,
       "n_positives": 5,
-      "auroc": 0.7429,
-      "auprc": 0.7342,
+      "auroc": 0.8571,
+      "auprc": 0.8711,
       "found_positives": [
         "A146",
         "G12",
@@ -228,8 +205,8 @@
       "status": "ok",
       "n_hotspots": 12,
       "n_positives": 6,
-      "auroc": 0.7361,
-      "auprc": 0.7329,
+      "auroc": 0.9167,
+      "auprc": 0.9444,
       "found_positives": [
         "G466",
         "G469",
@@ -246,8 +223,8 @@
       "status": "ok",
       "n_hotspots": 24,
       "n_positives": 5,
-      "auroc": 0.6,
-      "auprc": 0.3842,
+      "auroc": 0.6842,
+      "auprc": 0.4581,
       "found_positives": [
         "G719",
         "L858",
@@ -265,8 +242,8 @@
       "status": "ok",
       "n_hotspots": 48,
       "n_positives": 8,
-      "auroc": 0.6813,
-      "auprc": 0.4917,
+      "auroc": 0.6844,
+      "auprc": 0.4666,
       "found_positives": [
         "C420",
         "E453",
@@ -312,8 +289,8 @@
       "status": "ok",
       "n_hotspots": 13,
       "n_positives": 7,
-      "auroc": 0.619,
-      "auprc": 0.6337,
+      "auroc": 0.6667,
+      "auprc": 0.7116,
       "found_positives": [
         "D816",
         "D820",
@@ -331,8 +308,8 @@
       "status": "ok",
       "n_hotspots": 48,
       "n_positives": 5,
-      "auroc": 0.7721,
-      "auprc": 0.5571,
+      "auroc": 0.7953,
+      "auprc": 0.5889,
       "found_positives": [
         "C124",
         "G129",
@@ -379,8 +356,8 @@
       "status": "ok",
       "n_hotspots": 14,
       "n_positives": 6,
-      "auroc": 0.8333,
-      "auprc": 0.8302,
+      "auroc": 0.9792,
+      "auprc": 0.9762,
       "found_positives": [
         "D32",
         "G34",
@@ -413,8 +390,8 @@
       "status": "ok",
       "n_hotspots": 20,
       "n_positives": 5,
-      "auroc": 0.84,
-      "auprc": 0.7767,
+      "auroc": 0.8267,
+      "auprc": 0.7725,
       "found_positives": [
         "D769",
         "L755",
@@ -489,8 +466,8 @@
       "status": "ok",
       "n_hotspots": 11,
       "n_positives": 3,
-      "auroc": 0.7083,
-      "auprc": 0.7667,
+      "auroc": 0.75,
+      "auprc": 0.7778,
       "found_positives": [
         "K57",
         "P124",

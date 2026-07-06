@@ -387,11 +387,11 @@ if priority_rows:
         help="Full ranking with every sub-score and rationale, for your own analysis.",
     )
     st.caption(
-        "Priority = 0.30·recurrence + 0.35·pathogenicity + 0.20·druggability + "
-        "0.15·structural criticality. Recurrence: "
+        "Priority = 0.35·recurrence + 0.41·pathogenicity + 0.24·druggability. Recurrence: "
         "[cancerhotspots.org](https://www.cancerhotspots.org). Pathogenicity: "
         "DeepMind [AlphaMissense](https://alphafold.ebi.ac.uk). Druggability: "
-        "geometric pocket detection. Criticality: ENM/NMA. "
+        "geometric pocket detection. Structural criticality (ENM/NMA) is shown per residue "
+        "for context but is not a scored term (see docs/METHODS.md). "
         "Copy a residue (e.g. R175) into the sidebar to highlight it in 3D."
     )
 else:

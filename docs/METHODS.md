@@ -15,10 +15,10 @@ AlphaMissense score contributes 0 rather than breaking the ranking.
 
 ## Target Priority Score
 
-The headline ranking (`cancer_tool/scoring.py`) fuses four axes into one explainable score:
+The headline ranking (`cancer_tool/scoring.py`) fuses three axes into one explainable score:
 
 ```
-priority = 0.30·recurrence + 0.35·pathogenicity + 0.20·druggability + 0.15·criticality
+priority = 0.353·recurrence + 0.412·pathogenicity + 0.235·druggability
 ```
 
 | Axis | Source | Meaning |
@@ -26,32 +26,40 @@ priority = 0.30·recurrence + 0.35·pathogenicity + 0.20·druggability + 0.15·c
 | **recurrence** | cancerhotspots.org | tumour count for the residue, normalised to the gene's top hotspot |
 | **pathogenicity** | AlphaMissense (DeepMind) | probability the substitution is damaging |
 | **druggability** | LIGSITE / fpocket | whether the residue lines a detected pocket, weighted by that pocket's score |
-| **criticality** | ENM/NMA dynamics | structural importance — rigidity + hinge proximity, down-weighted by pLDDT |
 
 **Pathogenicity** uses the exact substitution score when numbering checks out, otherwise the
-positional mean (see *Numbering cross-check* below).
+positional mean (see *Numbering cross-check* below). We tested the positional **max** as an
+alternative and it *regressed* the benchmark — among already-recurrent hotspots the max
+saturates near 1.0 and loses discrimination (AUROC 0.66 → 0.57) — so mean stays.
 
-**Criticality** is
-`min(1.0, 0.7·rigidity + 0.3·[near a hinge]) · confidence(pLDDT)`, where hinge proximity is a
-±2-residue window and `confidence = clamp((pLDDT − 50) / 40, 0, 1)`. A residue in a
-low-confidence (low-pLDDT) region has its structural signal discounted, since ENM on an
-uncertain fold is unreliable.
+### Structural criticality is computed but NOT scored
+
+Earlier versions included a fourth axis, `criticality`
+(`min(1.0, 0.7·rigidity + 0.3·[near a hinge]) · confidence(pLDDT)`, ±2-residue hinge window,
+`confidence = clamp((pLDDT − 50) / 40, 0, 1)`). The benchmark showed it did **not** separate
+drivers from recurrent passengers — `criticality_only` AUROC ≈ **0.45** (below random) — and
+*including* it lowered the composite AUPRC (**0.63** with it vs **0.68** without). A 5-fold-CV
+logistic fit independently assigned it a weight of ~0. So criticality was **removed from the
+weighted score**. It is still computed and reported per residue (and drives the 3D flexibility
+colouring and hinge spotlight) for **explanation/visualisation**, but the folding-dynamics
+signal is not a ranking term. This is the honest reading of the evidence: on a
+recurrence-defined benchmark, ENM criticality carries no discriminative signal.
 
 ### Weights are heuristics, not a trained model
 
-The four weights are **expert-set** to reflect target-discovery priorities (pathogenicity and
-recurrence lead; druggability and structure refine) — they are **not** fitted to clinical
-outcomes. They are **robustness-tested rather than optimised**: `tests/test_scoring.py::`
-`test_weights_perturbation_keeps_top_driver` perturbs every weight by ±0.05 and asserts the
-top-ranked driver for the canonical genes is stable. The validation bar is rediscovering known
+The three weights are **expert-set** to reflect target-discovery priorities (pathogenicity and
+recurrence lead; druggability refines) — they are **not** fitted to clinical outcomes. They are
+the original 0.30 / 0.35 / 0.20 renormalised to sum to 1 after criticality's 0.15 was dropped.
+They are **robustness-tested rather than optimised**: `tests/test_scoring.py::`
+`test_weights_perturbation_keeps_top_driver` perturbs the weights and asserts the top-ranked
+driver for the canonical genes is stable. The validation bar is rediscovering known
 biology — TP53 → R273/R248/R175, KRAS → G12, BRAF → V600, EGFR → exon-19/L858/T790.
 
 ### Per-protein normalization (important caveat)
 
-Two inputs are normalised **per protein**, not globally:
-
-- **recurrence** = tumour count ÷ the gene's own top hotspot count;
-- the **rigidity** underlying criticality is min-max normalised across the single structure.
+The **recurrence** axis is normalised **per protein**, not globally: tumour count ÷ the gene's
+own top hotspot count. (The rigidity/flexibility profile behind the displayed criticality is
+also min-max normalised per structure, but that is a visualisation, not a scored term.)
 
 So a residue's score is meaningful **within** one protein (rank residues, compare drivers) but
 **not across** proteins — a 0.8 in TP53 is not the same absolute quantity as a 0.8 in KRAS.
@@ -71,7 +79,7 @@ transcript mismatch can't silently inject a wrong exact-variant score.
 Rediscovering a handful of textbook drivers is a sanity check, not validation. So the
 score is benchmarked against a curated, literature-backed gold standard of known oncogenic
 residues (`benchmark/gold_standard.json`, from OncoKB / cancerhotspots / Vogelstein 2013)
-across a **27-gene panel** — far beyond the eight featured genes.
+across a **27-gene panel** — which is also the featured/precomputed set.
 
 `scripts/benchmark.py` runs the live pipeline over the panel and evaluates the ranking with
 pure-NumPy metrics (`cancer_tool/metrics.py`, unit-tested in `tests/test_metrics.py`).
@@ -84,21 +92,25 @@ hotspot residues only* — so the score must separate true drivers from residues
 AUROC, AUPRC (average precision — the honest metric when positives are rare), and
 precision/recall@k, pooled and per-gene.
 
-**Result (v0.3.0, 440 residues, 97 positives, prevalence 0.22):** composite AUPRC ≈ **0.63**
-(a ~2.9× lift over the random baseline) with **precision@5 = 1.0** — the top of the ranking,
-which is what a user acts on, is essentially all true drivers.
+**Result (440 residues, 97 positives, prevalence 0.22):** the three-axis composite scores
+AUPRC ≈ **0.68** (a ~3× lift over the random baseline), AUROC ≈ 0.83, precision@5 = 0.8.
 
-**Honest caveat, stated because it matters.** On this panel *recurrence alone* scores a
-slightly higher tail AUPRC (~0.70) than the four-axis composite, and the leave-one-out
-ablation shows criticality and druggability slightly *lower* pooled AUPRC. This is expected
-and does not mean the extra axes are worthless: the benchmark's universe is *already-recurrent*
-residues, and the gold-standard positives were themselves partly identified *by* recurrence,
-so recurrence has a built-in edge here that would not transfer to residues where recurrence is
-silent. The composite's value is (a) top-of-list precision, (b) cross-axis explainability, and
-(c) the pathogenicity / druggability / structure signals recurrence cannot provide. A logistic
-model fit on the four axes (5-fold CV) reaches AUPRC ~0.73 and weights recurrence highest —
-reported for comparison in `REPORT.md`; the shipped default stays the expert set, and the
-weights are **not** tuned to this recurrence-biased benchmark.
+**How the criticality axis was dropped.** An earlier four-axis composite (with ENM criticality
+at 0.15) scored AUPRC ≈ 0.63. The ablation was decisive: `criticality_only` AUROC ≈ **0.45**
+(below random), and *removing* criticality *raised* the composite to ≈ 0.68. No ENM
+reformulation we tried (rigidity, flexibility, hinge-distance, extremity, with/without pLDDT
+confidence) rose above ~random on this set, and a 5-fold-CV logistic fit assigned criticality a
+weight of ~0. So it was removed from the score and kept as a visualisation only.
+
+**Honest caveat, stated because it matters.** Even after that, on this panel *recurrence alone*
+scores a slightly higher tail AUPRC (~0.70) than the composite. This is expected and does not
+mean the other axes are worthless: the benchmark's universe is *already-recurrent* residues,
+and the gold-standard positives were themselves partly identified *by* recurrence, so recurrence
+has a built-in edge here that would not transfer to residues where recurrence is silent — the
+scenario a non-circular benchmark (not yet built) would test. The composite's value is
+cross-axis explainability and the pathogenicity / druggability signals recurrence cannot
+provide. The shipped weights are the expert set (0.35 / 0.41 / 0.24), **not** tuned to this
+recurrence-biased benchmark.
 
 ## Folding dynamics (ENM/NMA)
 

@@ -5,14 +5,14 @@
   "length": 480,
   "provenance": {
     "tool_version": "0.3.0",
-    "git_commit": "7313dc4",
+    "git_commit": "a8db9fa",
     "packages": {
       "prody": "2.6.1",
-      "numpy": "2.4.6",
+      "numpy": "1.26.4",
       "scipy": "1.17.1"
     },
     "alphafold_model": "v6",
-    "fetched": "2026-07-05",
+    "fetched": "2026-07-06",
     "sources": [
       "UniProt",
       "AlphaFold DB",
@@ -28,10 +28,9 @@
       "hinge_modes": 3
     },
     "weights": {
-      "recurrence": 0.3,
-      "pathogenicity": 0.35,
-      "druggability": 0.2,
-      "criticality": 0.15
+      "recurrence": 0.3529,
+      "pathogenicity": 0.4118,
+      "druggability": 0.2353
     }
   },
   "priority": [
@@ -39,7 +38,7 @@
       "position": 17,
       "residue": "E17",
       "wt": "E",
-      "score": 91.1,
+      "score": 99.9,
       "recurrence": 1.0,
       "pathogenicity": 0.998,
       "druggability": 1.0,
@@ -50,10 +49,24 @@
       "rationale": "recurrently mutated (149 tumours); predicted pathogenic (Likely pathogenic); lines a druggable pocket"
     },
     {
+      "position": 79,
+      "residue": "Q79",
+      "wt": "Q",
+      "score": 64.8,
+      "recurrence": 0.04,
+      "pathogenicity": 0.967,
+      "druggability": 1.0,
+      "criticality": 0.04,
+      "tumours": 6,
+      "am_class": "LPath",
+      "numbering_ok": true,
+      "rationale": "mutated in 6 tumours; predicted pathogenic (Likely pathogenic); lines a druggable pocket"
+    },
+    {
       "position": 323,
       "residue": "D323",
       "wt": "D",
-      "score": 62.5,
+      "score": 64.6,
       "recurrence": 0.034,
       "pathogenicity": 0.969,
       "druggability": 1.0,
@@ -67,7 +80,7 @@
       "position": 52,
       "residue": "L52",
       "wt": "L",
-      "score": 57.9,
+      "score": 64.2,
       "recurrence": 0.034,
       "pathogenicity": 0.959,
       "druggability": 1.0,
@@ -78,24 +91,10 @@
       "rationale": "mutated in 5 tumours; predicted pathogenic (Likely pathogenic); lines a druggable pocket"
     },
     {
-      "position": 79,
-      "residue": "Q79",
-      "wt": "Q",
-      "score": 55.7,
-      "recurrence": 0.04,
-      "pathogenicity": 0.967,
-      "druggability": 1.0,
-      "criticality": 0.04,
-      "tumours": 6,
-      "am_class": "LPath",
-      "numbering_ok": true,
-      "rationale": "mutated in 6 tumours; predicted pathogenic (Likely pathogenic); lines a druggable pocket"
-    },
-    {
       "position": 65,
       "residue": "65-77",
       "wt": "T",
-      "score": 32.5,
+      "score": 27.2,
       "recurrence": 0.013,
       "pathogenicity": 0.649,
       "druggability": 0.0,

@@ -91,14 +91,23 @@ def compute_dynamics(
     """Compute folding dynamics from a single structure via elastic-network NMA.
 
     Returns per-residue flexibility/rigidity, hinge sites, the slowest ANM mode's
-    collectivity, and pLDDT (read from the Cα B-factor column). Cutoffs and gamma
-    are echoed into ``params`` for provenance. flexibility/rigidity are min-max
-    normalised per protein — comparable within a structure, not across.
+    collectivity, and pLDDT (read from the Cα B-factor column). ``plddt_is_confidence``
+    flags whether that column is really AlphaFold pLDDT (all values in [0, 100]) vs
+    experimental B-factors, so scoring can avoid misreading crystallographic B-factors
+    as confidence. Cutoffs and gamma are echoed into ``params`` for provenance.
+    flexibility/rigidity are min-max normalised per protein — comparable within a
+    structure, not across.
     """
     calphas = _parse_calphas(pdb_text)
     n_atoms = calphas.numAtoms()
     resnums = [int(n) for n in calphas.getResnums()]
-    plddt = [round(float(b), 1) for b in calphas.getBetas()]
+    betas = [float(b) for b in calphas.getBetas()]
+    plddt = [round(b, 1) for b in betas]
+    # AlphaFold stores per-residue pLDDT (0–100) in the B-factor column, but an
+    # experimental PDB stores crystallographic B-factors there instead. Any value
+    # outside [0, 100] means these are NOT pLDDT, so downstream scoring must not
+    # read them as confidence. A genuine AlphaFold model always passes this check.
+    plddt_is_confidence = bool(betas) and all(0.0 <= b <= 100.0 for b in betas)
     n_modes = max(1, min(n_modes, n_atoms - 1))
 
     gnm = GNM("enm")
@@ -129,6 +138,7 @@ def compute_dynamics(
     return {
         "residue_numbers": resnums,
         "plddt": plddt,
+        "plddt_is_confidence": plddt_is_confidence,
         "flexibility": [round(float(x), 4) for x in flexibility],
         "rigidity": [round(float(1.0 - x), 4) for x in flexibility],
         "hinges": hinges,

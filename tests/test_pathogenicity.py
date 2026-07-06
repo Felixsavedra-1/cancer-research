@@ -44,7 +44,7 @@ def test_lookup_helpers():
     parsed = patho.parse_alphamissense_csv(SAMPLE_CSV)
     assert patho.variant_score(parsed, "r175h")["score"] == 0.99
     assert patho.variant_score(parsed, "X999Y") is None
-    assert patho.position_pathogenicity(parsed, 1) == 0.70
+    assert patho.position_pathogenicity(parsed, 1) == 0.70  # positional mean
     assert patho.position_pathogenicity(parsed, 9999) == 0.0
 
 
